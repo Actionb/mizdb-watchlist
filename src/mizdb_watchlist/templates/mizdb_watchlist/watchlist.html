@@ -1,0 +1,45 @@
+{% load i18n %}
+<h1>Watchlist</h1>
+{% csrf_token %}
+
+<div id="watchlist" data-remove-url="{{ remove_url }}">
+    {% for model_name, watchlist_items in watchlist.items %}
+    <div id="{{model_name}}-watchlist">
+        <h2>{{ model_name }}</h2>
+        <ul class="list-group list-group-flush">
+            {% for watchlist_item in watchlist_items %}
+            <li class="list-group-item list-group-item-action d-flex justify-content-between">
+                <input type="hidden" name="object_id" value="{{ watchlist_item.object_id }}">
+                <input type="hidden" name="model_label" value="{{ watchlist_item.model_label }}">
+                <a href="{{ watchlist_item.object_url }}" class="text-decoration-none">{{ watchlist_item.object_repr }}</a>
+                <button class="btn text-danger watchlist-remove-btn" title="{% translate 'Remove from watchlist' %}">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-x"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+const removeURL = document.querySelector("#watchlist").dataset.removeUrl;
+document.querySelectorAll(".watchlist-remove-btn").forEach((btn) => {
+  btn.addEventListener("click", (e) => {
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value
+    const object_id = btn.parentElement.querySelector("input[name=object_id]").value;
+    const model_label = btn.parentElement.querySelector("input[name=model_label]").value;
+    const form = new FormData()
+    form.append('object_id', object_id)
+    form.append('model_label', model_label)
+    fetch(removeURL, {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': csrftoken
+      },
+      body: form,
+      mode: 'same-origin'
+    });
+  });
+});
+</script>
