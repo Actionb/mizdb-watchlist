@@ -11,8 +11,8 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.11"
-django = "^5.0.3"
+python = "^3.9"
+django = "^4.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.0.2"
