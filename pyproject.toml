@@ -33,7 +33,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.coverage.run]
 branch = true
-source = ["mizdb_tomselect"]
+source = ["mizdb_watchlist"]
 
 [tool.coverage.paths]
 source = ["src", ".tox/*/site-packages"]

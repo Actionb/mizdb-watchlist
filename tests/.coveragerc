@@ -1,0 +1,9 @@
+[run]
+branch = True
+source = mizdb_watchlist
+disable_warnings = module-not-measured
+
+[paths]
+source =
+    src/
+    .tox/*/site-packages
