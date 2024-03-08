@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h3>Watchlist {% if view.request.user.is_authenticated %}(Model){% else %}(Session){% endif %}</h3>
+    {% include "mizdb_watchlist/watchlist.html" %}
+{% endblock content %}

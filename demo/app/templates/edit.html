@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% load static mizdb_watchlist %}
+{% block extrahead %}
+    <script src="{% static 'mizdb_watchlist/js/watchlist.js' %}"></script>
+{% endblock extrahead %}
+
+{% block content %}
+<h4>Edit Person</h4>
+<h5>{{ object }} {% toggle_button view.request object %}</h5>
+<form method="post">{% csrf_token %}
+    {% for field in form %}
+    <div class="row mb-3 ms-3">
+        <label for="{{ field.id_for_label }}" class="col-form-label col-2">{{ field.label }}</label>
+        <div class="col-10">
+            <input class="form-control" type="text" id="{{ field.id }}" name="{{ field.name }}" value="{{ field.value }}">
+        </div>
+    </div>
+    {% endfor %}
+    <button type="submit" class="btn btn-success">Save</button>
+</form>
+{% endblock content %}

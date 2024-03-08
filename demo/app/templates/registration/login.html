@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+{% if form.errors %}
+<p class="text-danger">Your username and password didn't match. Please try again.</p>
+{% endif %}
+
+<span class="small text-secondary">Username: admin, Password: admin</span>
+<form method="post" action="{% url 'demo:login' %}" style="max-width: 400px;">
+{% csrf_token %}
+{% for field in form %}
+    <div class="row mb-3 ms-3">
+        <label for="{{ field.id_for_label }}" class="col-form-label col-3">{{ field.label }}</label>
+        <div class="col-9">
+            <input class="form-control" type="text" id="{{ field.id }}" name="{{ field.name }}" value="admin">
+        </div>
+    </div>
+{% endfor %}
+<input type="submit" value="login" class="btn btn-success">
+<input type="hidden" name="next" value="{{ next }}">
+</form>
+
+{% endblock %}
