@@ -1,6 +1,6 @@
 {% load i18n %}
 <button type="button"
-        class="btn watchlist-toggle-btn {% if on_watchlist %}on-watchlist text-success{% else %}text-primary{% endif %}"
+        class="watchlist-toggle-btn btn btn-link text-decoration-none {% if on_watchlist %}on-watchlist text-success{% else %}text-primary{% endif %}"
         title="{% trans 'Toggle watchlist' %}"
         data-url="{{ toggle_url }}" data-object-id="{{ object_id }}" data-model-label="{{ model_label }}"
->{% include 'mizdb_watchlist/watchlist_icon.svg' %}</button>
+>{% include 'mizdb_watchlist/watchlist_icon.svg' %}{% if text %}{{ text }}{% endif %}</button>
