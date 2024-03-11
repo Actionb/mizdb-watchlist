@@ -1,4 +1,3 @@
-from functools import cache
 from operator import itemgetter
 
 from django.contrib.contenttypes.models import ContentType
@@ -34,7 +33,6 @@ class BaseManager:
         """Return the watchlist for the current request."""
         raise NotImplementedError
 
-    @cache
     def get_model_watchlist(self, model):
         """Return the watchlist for the given model."""
         return self._get_model_watchlist(model)
@@ -42,7 +40,6 @@ class BaseManager:
     def _get_model_watchlist(self, model):
         raise NotImplementedError
 
-    @cache
     def on_watchlist(self, obj):
         """Return whether the given model object is on the watchlist."""
         return self._on_watchlist(obj)
@@ -103,21 +100,32 @@ class SessionManager(BaseManager):
             self.request.session[WATCHLIST_SESSION_KEY] = {}
         return self.request.session[WATCHLIST_SESSION_KEY]
 
+    def _get_watchlist_label(self, model):
+        """Return the label to use for a watchlist for the given model."""
+        return model._meta.label_lower
+
+    def _add_model_watchlist(self, model):
+        """
+        Add a model watchlist for the given model if the current watchlist does
+        not already contain one.
+        """
+        watchlist = self.get_watchlist()
+        label = self._get_watchlist_label(model)
+        if label not in watchlist:
+            watchlist[label] = []
+
     def _get_model_watchlist(self, model):
         watchlist = self.get_watchlist()
-        label = model._meta.label_lower
-        # FIXME: this will add the model label to the watchlist even if no
-        #  objects are going to be added (f.ex. in remove())
-        if label not in watchlist:  # pragma: no cover
-            watchlist[label] = []
-        return watchlist[label]
+        return watchlist.get(self._get_watchlist_label(model), [])
 
     def _on_watchlist(self, obj):
         return obj.pk in self.pks(self.get_model_watchlist(obj))
 
     def add(self, obj):
         if not self.on_watchlist(obj):
-            self.get_model_watchlist(obj).append({"object_id": obj.pk, "object_repr": str(obj)})
+            self._add_model_watchlist(obj)
+            model_watchlist = self.get_model_watchlist(obj)
+            model_watchlist.append({"object_id": obj.pk, "object_repr": str(obj)})
             self.request.session.modified = True
 
     def remove(self, obj):
