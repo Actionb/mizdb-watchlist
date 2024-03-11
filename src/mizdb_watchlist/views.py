@@ -21,11 +21,16 @@ def _get_model_object(model_label, pk):
 class WatchlistViewMixin(ContextMixin):
     """View for viewing and editing the watchlist of the current user."""
 
+    def get_url_namespace(self):
+        return self.request.resolver_match.namespace  # noqa
+
     def get_object_url(self, model, pk):
-        request = self.request  # noqa
-        namespace = request.resolver_match.namespace
         opts = model._meta
-        return reverse(f"{namespace}:{opts.app_label}_{opts.model_name}_change", args=[pk])
+        viewname = f"{opts.app_label}_{opts.model_name}_change"
+        namespace = self.get_url_namespace()
+        if namespace:
+            viewname = f"{namespace}:{viewname}"
+        return reverse(viewname, args=[pk])
 
     def get_remove_url(self):
         return reverse("watchlist:remove")
@@ -65,6 +70,9 @@ class AdminWatchlistView(WatchlistViewMixin, TemplateView):
             js=["mizdb_watchlist/js/watchlist.js"],
             css={"all": ["mizdb_watchlist/css/watchlist.css"]},
         )
+
+    def get_url_namespace(self):
+        return self.admin_site.name
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
