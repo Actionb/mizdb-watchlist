@@ -19,9 +19,9 @@ class Migration(migrations.Migration):
             name="Watchlist",
             fields=[
                 ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
-                ("object_id", models.IntegerField()),
-                ("object_repr", models.CharField(max_length=200)),
-                ("time_added", models.DateTimeField(auto_now_add=True)),
+                ("object_id", models.IntegerField(verbose_name="Object ID")),
+                ("object_repr", models.CharField(max_length=200, verbose_name="Object representation")),
+                ("time_added", models.DateTimeField(auto_now_add=True, verbose_name="Added at")),
                 ("notes", models.TextField(blank=True, verbose_name="Additional Notes")),
                 (
                     "content_type",
