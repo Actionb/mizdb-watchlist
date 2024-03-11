@@ -1,0 +1,40 @@
+#watchlist {
+    max-width: 1320px;
+}
+
+#watchlist ul li {
+    display: flex;
+    justify-content: space-between;
+}
+
+#watchlist ul li:not(:last-child) {
+    border-bottom: 1px solid lightgray;
+}
+
+#watchlist ul li a {
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
+.watchlist-btn {
+    padding: 0.375rem 0.75rem;
+    border-style: none;
+    background: none;
+}
+
+.watchlist-btn:hover {
+    cursor: pointer;
+}
+
+.watchlist-btn > * {
+    vertical-align: middle;
+}
+
+.watchlist-remove-btn {
+    border-color: red;
+    color: red;
+}
+
+.watchlist-toggle-btn.on-watchlist {
+    color: rgb(24, 188, 156);
+}

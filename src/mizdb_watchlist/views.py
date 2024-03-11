@@ -59,9 +59,16 @@ class AdminWatchlistView(WatchlistViewMixin, TemplateView):
     admin_site = admin.sites.site  # TODO: explain that people should set this value to their admin site
     title = gettext_lazy("My watchlist")
 
+    @property
+    def media(self):
+        return forms.Media(
+            js=["mizdb_watchlist/js/watchlist.js"],
+            css={"all": ["mizdb_watchlist/css/watchlist.css"]},
+        )
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["media"] = forms.Media(js=["mizdb_watchlist/js/watchlist.js"])
+        context["media"] = self.media
         context["title"] = self.title
         context.update(self.admin_site.each_context(self.request))
         return context

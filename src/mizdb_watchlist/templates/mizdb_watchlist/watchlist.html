@@ -10,7 +10,7 @@
             {% for watchlist_item in watchlist_items %}
             <li class="list-group-item list-group-item-action d-flex justify-content-between">
                 <a href="{{ watchlist_item.object_url }}" class="text-decoration-none my-auto">{{ watchlist_item.object_repr }}</a>
-                <button class="btn text-danger watchlist-remove-btn" title="{% translate 'Remove from watchlist' %}" data-url="{{ remove_url }}" data-object-id="{{ watchlist_item.object_id }}" data-model-label="{{ watchlist_item.model_label }}">
+                <button class="btn text-danger watchlist-btn watchlist-remove-btn" title="{% translate 'Remove from watchlist' %}" data-url="{{ remove_url }}" data-object-id="{{ watchlist_item.object_id }}" data-model-label="{{ watchlist_item.model_label }}">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-x"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                 </button>
             </li>

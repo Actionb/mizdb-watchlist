@@ -1,5 +1,9 @@
 {% extends "admin/base_site.html" %}
 
+{% block extrahead %}
+    {{ media }}
+{% endblock extrahead %}
+
 {% block content %}
     {% include "mizdb_watchlist/watchlist.html" %}
 {% endblock %}
