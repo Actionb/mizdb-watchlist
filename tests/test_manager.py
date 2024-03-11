@@ -60,7 +60,9 @@ def session_pks(model):
     """Return a list of all primary keys in the session watchlist."""
 
     def inner(request):
-        return list(map(itemgetter("object_id"), request.session[WATCHLIST_SESSION_KEY][model._meta.label_lower]))
+        return list(
+            map(itemgetter("object_id"), request.session[WATCHLIST_SESSION_KEY].get(model._meta.label_lower, []))
+        )
 
     return inner
 
@@ -121,6 +123,15 @@ class TestSessionManager:
     def test_remove(self, manager, get_request, test_obj, session_pks):
         manager.remove(test_obj)
         assert test_obj.pk not in session_pks(get_request)
+
+    def test_removing_last_item_removes_model_watchlist(self, manager, get_request, test_obj, session_pks):
+        """
+        Assert that removing the last item of a model watchlist also removes
+        the model label key from the global watchlist.
+        """
+        manager.remove(test_obj)
+        label = manager._get_watchlist_label(test_obj)
+        assert label not in manager.get_watchlist()
 
 
 @pytest.fixture

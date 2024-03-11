@@ -132,7 +132,8 @@ class SessionManager(BaseManager):
         if self.on_watchlist(obj):
             model_watchlist = self.get_model_watchlist(obj)
             model_watchlist.pop(self.pks(model_watchlist).index(obj.pk))
-            # TODO: remove model watchlist entirely when this was the last item
+            if not model_watchlist:
+                del self.get_watchlist()[self._get_watchlist_label(obj)]
             self.request.session.modified = True
 
     def as_dict(self):
