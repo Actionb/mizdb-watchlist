@@ -155,7 +155,7 @@ class ModelManager(BaseManager):
                 user=self.request.user,
                 content_type=self.get_content_type(obj),
                 object_id=obj.pk,
-                object_repr=repr(obj),
+                object_repr=str(obj),
             )
 
     def remove(self, obj):
