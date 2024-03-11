@@ -12,7 +12,7 @@
 {% for person in object_list %}
     <li class="list-group-item list-group-item-action">
         <div class="d-flex justify-content-between">
-            <a href="{% url 'demo:app_person_change' pk=person.pk %}">{{ person }}</a>
+            <a href="{% url 'demo:app_person_change' pk=person.pk %}" class="my-auto">{{ person }}</a>
             {% toggle_button view.request person on_watchlist=person.on_watchlist %}
         </div>
     </li>
