@@ -17,5 +17,5 @@ class Watchlist(models.Model):
 
     class Meta:
         ordering = ["user", "content_type", "time_added"]
-        verbose_name = _("Watchlist")
-        verbose_name_plural = _("Watchlists")
+        verbose_name = _("Watchlist Item")
+        verbose_name_plural = _("Watchlist Items")
