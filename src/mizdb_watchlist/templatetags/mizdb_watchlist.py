@@ -1,4 +1,8 @@
+from typing import Optional
+
 from django import template
+from django.db.models import Model
+from django.http import HttpRequest
 from django.urls import reverse
 
 from mizdb_watchlist.manager import get_manager
@@ -7,7 +11,13 @@ register = template.Library()
 
 
 @register.inclusion_tag("mizdb_watchlist/toggle_button.html")
-def toggle_button(request, obj, text="", url=None, on_watchlist=None):
+def toggle_button(
+    request: HttpRequest,
+    obj: Model,
+    text: str = "",
+    url: Optional[str] = None,
+    on_watchlist: Optional[bool] = None,
+) -> dict:
     """
     Render a watchlist toggle button for the given model object.
 
