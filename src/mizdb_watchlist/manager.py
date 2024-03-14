@@ -31,29 +31,29 @@ class BaseManager:
 
     def get_watchlist(self):
         """Return the watchlist for the current request."""
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     def get_model_watchlist(self, model):
         """Return the watchlist for the given model."""
         return self._get_model_watchlist(model)
 
     def _get_model_watchlist(self, model):
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     def on_watchlist(self, obj):
         """Return whether the given model object is on the watchlist."""
         return self._on_watchlist(obj)
 
     def _on_watchlist(self, obj):
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     def add(self, obj):
         """Add the given model object to the watchlist."""
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     def remove(self, obj):
         """Remove the given model object from the watchlist."""
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     def toggle(self, obj):
         """
@@ -69,11 +69,11 @@ class BaseManager:
 
     def as_dict(self):
         """Return the watchlist as a dictionary."""
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     def pks(self, model_watchlist):
         """Return the primary keys of the items of the given model watchlist."""
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     def annotate_queryset(self, queryset):
         """
@@ -137,7 +137,7 @@ class SessionManager(BaseManager):
             self.request.session.modified = True
 
     def as_dict(self):
-        return self.get_watchlist()
+        return self.get_watchlist()  # pragma: no cover
 
     def pks(self, model_watchlist):
         return list(map(itemgetter("object_id"), model_watchlist))

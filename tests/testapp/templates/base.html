@@ -1,0 +1,28 @@
+<!doctype html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>MIZDB Watchlist Demo</title>
+    <link href="{% static 'bootstrap/dist/css/bootstrap.css' %}" rel="stylesheet">
+    <link href="{% static 'bootswatch/dist/flatly/bootstrap.css' %}" rel="stylesheet">
+    <script src="{% static 'bootstrap/dist/js/bootstrap.bundle.js' %}"></script>
+    {% block extrahead %}{% endblock extrahead %}
+</head>
+<body class="container">
+<nav class="navbar navbar-expand">
+    <span class="navbar-brand">Watchlist Demo</span>
+    <ul class="navbar-nav w-100">
+        <li class="nav-item"><a href="{% url 'changelist' %}" class="nav-link">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-list"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+            Changelist
+        </a></li>
+        <li class="nav-item"><a href="{% url 'watchlist' %}" class="nav-link">{% include 'mizdb_watchlist/watchlist_icon.svg' %} Watchlist</a></li>
+    </ul>
+</nav>
+{% block content %}
+{% endblock content %}
+</body>
+</html>

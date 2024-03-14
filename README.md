@@ -10,6 +10,10 @@ make init
 ```
 
 ### Tests
+Install required playwright browsers with:
+```commandline
+playwright install
+```
 Run tests with 
 ```commandline
 make test

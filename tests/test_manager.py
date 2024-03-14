@@ -1,98 +1,78 @@
 from operator import itemgetter
+from typing import Union
 
 import pytest
-from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
-from django.contrib.contenttypes.models import ContentType
-from django.test import RequestFactory
 
 from mizdb_watchlist.manager import WATCHLIST_SESSION_KEY, ModelManager, SessionManager, get_manager
-from mizdb_watchlist.models import Watchlist
-from tests.factories import PersonFactory
-from tests.testapp.models import Person
 
 pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def model():
-    return Person
-
-
-@pytest.fixture
-def test_obj():
-    return PersonFactory()
-
-
-@pytest.fixture
-def user():
-    return get_user_model().objects.create_superuser(
-        username="superuser", password="foobar", email="testtest@test.test"
-    )
-
-
-@pytest.fixture
-def session_watchlist(test_obj):
-    """Default session watchlist. Overwrite with test method parametrization."""
+def session_watchlist(test_obj) -> list[dict]:
+    """The watchlist to be used with a session watchlist."""
     return [{"object_id": test_obj.pk, "object_repr": str(test_obj)}]
 
 
 @pytest.fixture
-def get_request(client, user, model, session_watchlist):
-    request = RequestFactory().get("")
-    request.user = user
-    session = client.session
-    session.flush()
-    if session_watchlist:
-        session[WATCHLIST_SESSION_KEY] = {}
-        session[WATCHLIST_SESSION_KEY][model._meta.label_lower] = session_watchlist
-    request.session = session
-    return request
+def model_watchlist(model_label, session_watchlist) -> dict:
+    """The watchlist for the test model."""
+    return {model_label: session_watchlist}
 
 
 @pytest.fixture
-def manager(manager_class, get_request):
-    return manager_class(get_request)
+def session_data(model_watchlist) -> dict:
+    # Override session_data fixture to add the given model watchlist to the
+    # default session data.
+    if model_watchlist:
+        return {WATCHLIST_SESSION_KEY: model_watchlist}
+    return {}
 
 
 @pytest.fixture
-def session_pks(model):
+def manager(manager_class, http_request, add_session) -> Union[SessionManager, ModelManager]:
+    """Return a watchlist manager instance for the current HTTP request."""
+    return manager_class(http_request)
+
+
+@pytest.fixture
+def session_pks(model_label):
     """Return a list of all primary keys in the session watchlist."""
 
-    def inner(request):
-        return list(
-            map(itemgetter("object_id"), request.session[WATCHLIST_SESSION_KEY].get(model._meta.label_lower, []))
-        )
+    def inner(request) -> list[int]:
+        return list(map(itemgetter("object_id"), request.session[WATCHLIST_SESSION_KEY].get(model_label, [])))
 
     return inner
 
 
 @pytest.mark.parametrize("user", [AnonymousUser()])
-def test_get_manager_anonymous_user(get_request, user):
+def test_get_manager_anonymous_user(http_request, user):
     """
     Assert that get_manager returns a SessionManager for requests made by
     unauthenticated users.
     """
-    assert isinstance(get_manager(get_request), SessionManager)
+    assert isinstance(get_manager(http_request), SessionManager)
 
 
 @pytest.mark.parametrize("user", [None])
-def test_get_manager_user_not_set(get_request, user):
+def test_get_manager_user_not_set(http_request, user):
     """
     Assert that get_manager returns a SessionManager for requests where the
     user attribute is not set.
     """
-    assert isinstance(get_manager(get_request), SessionManager)
+    assert isinstance(get_manager(http_request), SessionManager)
 
 
-def test_get_manager_authenticated_user(get_request, user):
+def test_get_manager_authenticated_user(http_request, user):
     """
     Assert that get_manager returns a ModelManager for requests made by
     authenticated users.
     """
-    assert isinstance(get_manager(get_request), ModelManager)
+    assert isinstance(get_manager(http_request), ModelManager)
 
 
+@pytest.mark.usefixtures("add_session")
 @pytest.mark.parametrize("manager_class", [SessionManager])
 @pytest.mark.parametrize("user", [None])
 class TestSessionManager:
@@ -112,19 +92,24 @@ class TestSessionManager:
         assert not manager.on_watchlist(test_obj)
 
     @pytest.mark.parametrize("session_watchlist", [[]])
-    def test_add(self, manager, get_request, test_obj, session_pks, session_watchlist):
+    def test_add(self, manager, http_request, test_obj, session_pks, session_watchlist):
         manager.add(test_obj)
-        assert test_obj.pk in session_pks(get_request)
+        assert test_obj.pk in session_pks(http_request)
 
-    def test_add_already_on_watchlist(self, manager, get_request, test_obj, session_pks):
+    def test_add_already_on_watchlist(self, manager, http_request, test_obj, session_pks):
         manager.add(test_obj)
-        assert session_pks(get_request).count(test_obj.pk) == 1
+        assert session_pks(http_request).count(test_obj.pk) == 1
 
-    def test_remove(self, manager, get_request, test_obj, session_pks):
+    def test_remove(self, manager, http_request, test_obj, session_pks):
         manager.remove(test_obj)
-        assert test_obj.pk not in session_pks(get_request)
+        assert test_obj.pk not in session_pks(http_request)
 
-    def test_removing_last_item_removes_model_watchlist(self, manager, get_request, test_obj, session_pks):
+    @pytest.mark.parametrize("session_watchlist", [[]])
+    def test_remove_not_on_watchlist(self, manager, http_request, test_obj, session_pks, session_watchlist):
+        manager.remove(test_obj)
+        assert test_obj.pk not in session_pks(http_request)
+
+    def test_removing_last_item_removes_model_watchlist(self, manager, test_obj, session_pks):
         """
         Assert that removing the last item of a model watchlist also removes
         the model label key from the global watchlist.
@@ -133,20 +118,25 @@ class TestSessionManager:
         label = manager._get_watchlist_label(test_obj)
         assert label not in manager.get_watchlist()
 
+    def test_annotate_queryset(self, manager, model, test_obj):
+        queryset = model.objects.all()
+        queryset = manager.annotate_queryset(queryset)
+        assert queryset.get(pk=test_obj.pk).on_watchlist
 
-@pytest.fixture
-def watchlist_model():
-    return Watchlist
+    @pytest.mark.parametrize("session_watchlist", [[]])
+    def test_annotate_queryset_not_on_watchlist(self, manager, model, test_obj, session_watchlist):
+        queryset = model.objects.all()
+        queryset = manager.annotate_queryset(queryset)
+        assert not queryset.get(pk=test_obj.pk).on_watchlist
 
+    def test_add_model_watchlist(self, manager, model, model_label):
+        manager._add_model_watchlist(model)
+        assert model_label in manager.get_watchlist()
 
-@pytest.fixture
-def add_to_watchlist(watchlist_model, user, test_obj):
-    return watchlist_model.objects.create(
-        user=user,
-        content_type=ContentType.objects.get_for_model(test_obj),
-        object_id=test_obj.pk,
-        object_repr=repr(test_obj),
-    )
+    @pytest.mark.parametrize("model_watchlist", [{}])
+    def test_add_model_watchlist_model_not_on_watchlist(self, manager, model, model_label, model_watchlist):
+        manager._add_model_watchlist(model)
+        assert model_label in manager.get_watchlist()
 
 
 @pytest.mark.parametrize("manager_class", [ModelManager])
@@ -176,3 +166,22 @@ class TestModelManager:
     def test_toggle_not_on_watchlist(self, manager, user, test_obj, watchlist_model):
         assert manager.toggle(test_obj)
         assert watchlist_model.objects.filter(object_id=test_obj.pk, user_id=user.pk).exists()
+
+    def test_annotate_queryset(self, manager, model, test_obj, add_to_watchlist):
+        queryset = model.objects.all()
+        queryset = manager.annotate_queryset(queryset)
+        assert queryset.get(pk=test_obj.pk).on_watchlist
+
+    def test_annotate_queryset_not_on_watchlist(self, manager, model, test_obj):
+        queryset = model.objects.all()
+        queryset = manager.annotate_queryset(queryset)
+        assert not queryset.get(pk=test_obj.pk).on_watchlist
+
+    def test_as_dict(self, manager, model, model_label, test_obj, add_to_watchlist):
+        as_dict = manager.as_dict()
+        assert model_label in as_dict
+        model_watchlist = as_dict[model_label]
+        assert len(model_watchlist) == 1
+        assert model_watchlist[0]["object_id"] == test_obj.pk
+        assert model_watchlist[0]["object_repr"] == str(test_obj)
+        assert model_watchlist[0]["notes"] == ""

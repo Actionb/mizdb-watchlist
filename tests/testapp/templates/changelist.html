@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% load static mizdb_watchlist %}
+
+{% block extrahead %}
+    <script src="{% static 'mizdb_watchlist/js/watchlist.js' %}"></script>
+{% endblock extrahead %}
+
+{% block content %}
+{% csrf_token %}
+<h4>Person Changelist</h4>
+<ul class="list-group list-group-flush">
+{% for person in object_list %}
+    <li class="list-group-item list-group-item-action changelist-item">
+        <div class="d-flex justify-content-between">
+            <input type="hidden" name="object_id" value="{{ person.pk }}">
+            <a href="{% url 'testapp_person_change' pk=person.pk %}" class="my-auto">{{ person }}</a>
+            {% toggle_button view.request person on_watchlist=person.on_watchlist %}
+        </div>
+    </li>
+{% empty %}
+    <li>No Person objects!</li>
+{% endfor %}
+</ul>
+{% endblock content %}

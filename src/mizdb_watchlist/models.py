@@ -13,7 +13,7 @@ class Watchlist(models.Model):
     notes = models.TextField(blank=True, verbose_name=_("Additional Notes"))
 
     def __str__(self):
-        return f"{self.content_type.name}: {self.object_repr}"
+        return f"{self.content_type.name}: {self.object_repr}"  # pragma: no cover
 
     class Meta:
         ordering = ["user", "content_type", "time_added"]

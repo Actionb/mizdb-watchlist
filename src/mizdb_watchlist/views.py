@@ -92,7 +92,7 @@ def watchlist_toggle(request):
     try:
         pk = int(request.POST["object_id"])
         model_label = request.POST["model_label"]
-    except (KeyError, ValueError):  # pragma: no cover
+    except (KeyError, ValueError):
         return HttpResponseBadRequest()
     try:
         obj = _get_model_object(model_label, pk)
@@ -113,7 +113,7 @@ def watchlist_remove(request):
     try:
         pk = int(request.POST["object_id"])
         model_label = request.POST["model_label"]
-    except (KeyError, ValueError):  # pragma: no cover
+    except (KeyError, ValueError):
         return HttpResponseBadRequest()
     try:
         manager = get_manager(request)
