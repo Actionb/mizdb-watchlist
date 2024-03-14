@@ -4,14 +4,9 @@ Django model and views that implement a "watchlist" of other Django objects.
 
 ## Demo & Development
 
-Install using [poetry](https://python-poetry.org/docs/):
+Install (requires [poetry](https://python-poetry.org/docs/) and npm):
 ```commandline
-poetry install
-```
-
-Install JavaScript Standard Style (for formatting/linting) and Bootstrap (for the demo):
-```commandline
-npm install
+make init
 ```
 
 ### Tests
@@ -30,7 +25,7 @@ Use
 ```commandline
 make lint
 ```
-to check for code style issues and use
+to check for code style issues. Use
 ```commandline
 make reformat
 ```

@@ -26,6 +26,7 @@ build:
 .PHONY: init
 init:
 	poetry install
+	npm install
 
 .PHONY: init-demo
 init-demo:
