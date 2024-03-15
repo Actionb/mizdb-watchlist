@@ -1,9 +1,9 @@
 (() => {
-  async function act (btn) {
+  function getRequest (btn) {
     const form = new FormData()
     form.append('object_id', btn.dataset.objectId)
     form.append('model_label', btn.dataset.modelLabel)
-    return fetch(btn.dataset.url, {
+    return new Request(btn.dataset.url, {
       method: 'POST',
       headers: {
         'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
@@ -14,9 +14,11 @@
   }
 
   document.addEventListener('DOMContentLoaded', () => {
+    // Add handler for the toggle button:
     document.querySelectorAll('.watchlist-toggle-btn').forEach((btn) => {
       btn.addEventListener('click', (e) => {
-        act(btn).then(response => response.json()).then(data => {
+        e.preventDefault()
+        fetch(getRequest(btn)).then(response => response.json()).then(data => {
           if (data.on_watchlist) {
             btn.classList.remove('text-primary')
             btn.classList.add('text-success')
@@ -29,15 +31,21 @@
         })
       })
     })
+
+    // Add handler for the remove button:
     document.querySelectorAll('.watchlist-remove-btn').forEach((btn) => {
       btn.addEventListener('click', (e) => {
-        act(btn).then(response => {
+        e.preventDefault()
+        fetch(getRequest(btn)).then(response => {
           if (response.ok) {
-            const li = btn.parentElement
-            const ul = li.parentElement
-            const div = ul.parentElement
-            li.remove()
-            if (ul.children.length === 0) div.remove()
+            if (btn.closest('.watchlist-items-list').children.length === 1) {
+              // This is the only watchlist item for that model - remove the
+              // model container.
+              btn.closest('.model-watchlist-container').remove()
+            } else {
+              // Remove just this watchlist item.
+              btn.closest('.watchlist-item').remove()
+            }
           }
         })
       })
