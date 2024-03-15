@@ -1,14 +1,9 @@
 from collections import OrderedDict
 
-from django import forms
 from django.apps import apps
-from django.contrib import admin
-from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.urls import reverse
-from django.utils.translation import gettext_lazy
-from django.views.generic import TemplateView
 from django.views.generic.base import ContextMixin
 
 from mizdb_watchlist.manager import get_manager
@@ -20,30 +15,37 @@ def _get_model_object(model_label, pk):
 
 
 class WatchlistViewMixin(ContextMixin):
-    """View for viewing and editing the watchlist of the current user."""
+    """A view mixin that adds template context items for displaying the watchlist."""
 
-    def get_url_namespace(self):
-        return self.request.resolver_match.namespace  # noqa
+    def get_url_namespace(self, request):
+        """Return the namespace of the given request."""
+        return request.resolver_match.namespace
 
-    def get_object_url(self, model, pk):
+    def get_object_url(self, request, model, pk):
+        """
+        Return the URL to the change page of the object described by the given
+        model and primary key.
+        """
         opts = model._meta
         viewname = f"{opts.app_label}_{opts.model_name}_change"
-        namespace = self.get_url_namespace()
+        namespace = self.get_url_namespace(request)
         if namespace:
             viewname = f"{namespace}:{viewname}"
         return reverse(viewname, args=[pk])
 
     def get_remove_url(self):
+        """Return the URL for the view that removes items from the watchlist."""
         return reverse("watchlist:remove")
 
-    def get_watchlist(self):
-        request = self.request  # noqa
+    def get_watchlist(self, request):
+        """Return the watchlist in dictionary form for the given request."""
         return get_manager(request).as_dict()
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+    def get_watchlist_context(self, request):
+        """Return template context items for display the watchlist."""
+        context = {}
         watchlist = {}
-        for model_label, watchlist_items in self.get_watchlist().items():
+        for model_label, watchlist_items in self.get_watchlist(request).items():
             try:
                 model = apps.get_model(model_label)
             except LookupError:
@@ -51,7 +53,7 @@ class WatchlistViewMixin(ContextMixin):
 
             # Add the URL to the change page of each item:
             for watchlist_item in watchlist_items:
-                watchlist_item["object_url"] = self.get_object_url(model, watchlist_item["object_id"])
+                watchlist_item["object_url"] = self.get_object_url(request, model, watchlist_item["object_id"])
                 watchlist_item["model_label"] = model_label
 
             watchlist[model._meta.verbose_name] = watchlist_items
@@ -59,38 +61,10 @@ class WatchlistViewMixin(ContextMixin):
         context["remove_url"] = self.get_remove_url()
         return context
 
-
-class AdminWatchlistView(PermissionRequiredMixin, WatchlistViewMixin, TemplateView):
-    template_name = "admin/watchlist.html"
-    admin_site = admin.sites.site  # TODO: explain that people should set this value to their admin site
-    title = gettext_lazy("My watchlist")
-
-    @property
-    def media(self):
-        return forms.Media(
-            js=["mizdb_watchlist/js/watchlist.js"],
-            css={"all": ["mizdb_watchlist/css/watchlist.css"]},
-        )
-
-    def get_url_namespace(self):
-        return self.admin_site.name
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["media"] = self.media
-        context["title"] = self.title
-        context.update(self.admin_site.each_context(self.request))
+        context.update(self.get_watchlist_context(self.request))  # noqa
         return context
-
-    def get_login_url(self):
-        return reverse(f"{self.admin_site.name}:login", current_app=self.admin_site.name)
-
-    def has_permission(self):
-        """
-        Return True if the given HttpRequest has permission to view
-        *at least one* page in the admin site.
-        """
-        return self.request.user.is_active and self.request.user.is_staff
 
 
 def watchlist_toggle(request):

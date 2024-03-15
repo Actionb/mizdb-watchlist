@@ -19,11 +19,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 
-from mizdb_watchlist.views import AdminWatchlistView
-
 urlpatterns = [
-    # TODO: mention in docs that you need to add this path before admin.site.urls:
-    path("admin/watchlist/", AdminWatchlistView.as_view(), name="admin_watchlist"),
     path("admin/", admin.site.urls),
     path("mizdb_watchlist/", include("mizdb_watchlist.urls")),
     path("", include("app.urls")),
