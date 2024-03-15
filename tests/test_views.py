@@ -6,6 +6,7 @@ from django.contrib import admin
 from django.http import HttpResponse
 from django.urls import include, path, reverse
 from django.views import View
+from pytest_django.asserts import assertRedirects
 
 from mizdb_watchlist.views import AdminWatchlistView, WatchlistViewMixin, watchlist_remove, watchlist_toggle
 
@@ -119,6 +120,11 @@ class TestAdminWatchlistView:
             context = view.get_context_data()
             each_context_mock.assert_called()
             assert context["foo"] == "bar"
+
+    @pytest.mark.parametrize("login_user", [None])
+    def test_permission_required(self, client, login_user):
+        response = client.get(reverse("test:admin_watchlist"))
+        assertRedirects(response, reverse("test_site:login") + "?next=%2Fadmin%2Fwatchlist%2F")
 
 
 @pytest.fixture

@@ -3,6 +3,7 @@ from collections import OrderedDict
 from django import forms
 from django.apps import apps
 from django.contrib import admin
+from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.urls import reverse
@@ -59,7 +60,7 @@ class WatchlistViewMixin(ContextMixin):
         return context
 
 
-class AdminWatchlistView(WatchlistViewMixin, TemplateView):
+class AdminWatchlistView(PermissionRequiredMixin, WatchlistViewMixin, TemplateView):
     template_name = "admin/watchlist.html"
     admin_site = admin.sites.site  # TODO: explain that people should set this value to their admin site
     title = gettext_lazy("My watchlist")
@@ -80,6 +81,16 @@ class AdminWatchlistView(WatchlistViewMixin, TemplateView):
         context["title"] = self.title
         context.update(self.admin_site.each_context(self.request))
         return context
+
+    def get_login_url(self):
+        return reverse(f"{self.admin_site.name}:login", current_app=self.admin_site.name)
+
+    def has_permission(self):
+        """
+        Return True if the given HttpRequest has permission to view
+        *at least one* page in the admin site.
+        """
+        return self.request.user.is_active and self.request.user.is_staff
 
 
 def watchlist_toggle(request):
