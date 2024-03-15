@@ -118,6 +118,12 @@ def http_request(rf, request, path, request_method, request_data, user):
 
 
 @pytest.fixture
+def ignore_csrf_protection(http_request):
+    http_request.csrf_processing_done = True
+    return http_request
+
+
+@pytest.fixture
 def path() -> str:
     """
     The default request path.

@@ -101,7 +101,7 @@ def object_id(test_obj):
     return test_obj.pk
 
 
-@pytest.mark.usefixtures("login_user")
+@pytest.mark.usefixtures("login_user", "ignore_csrf_protection")
 @pytest.mark.parametrize("request_method", ["POST"])
 class TestWatchlistToggle:
 
@@ -138,7 +138,7 @@ class TestWatchlistToggle:
         assert not json.loads(response.content)["on_watchlist"]
 
 
-@pytest.mark.usefixtures("login_user")
+@pytest.mark.usefixtures("login_user", "ignore_csrf_protection")
 @pytest.mark.parametrize("request_method", ["POST"])
 class TestWatchlistRemove:
 

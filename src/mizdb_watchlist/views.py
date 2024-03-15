@@ -4,6 +4,7 @@ from django.apps import apps
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.urls import reverse
+from django.views.decorators.csrf import csrf_protect
 from django.views.generic.base import ContextMixin
 
 from mizdb_watchlist.manager import get_manager
@@ -67,6 +68,7 @@ class WatchlistViewMixin(ContextMixin):
         return context
 
 
+@csrf_protect
 def watchlist_toggle(request):
     """
     Add an object to the watchlist, or remove an object if it already exists on
@@ -89,6 +91,7 @@ def watchlist_toggle(request):
     return JsonResponse({"on_watchlist": on_watchlist})
 
 
+@csrf_protect
 def watchlist_remove(request):
     """
     Remove an object from the watchlist.
