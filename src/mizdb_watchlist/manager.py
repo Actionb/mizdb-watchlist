@@ -1,5 +1,6 @@
 from operator import itemgetter
 
+from django.apps import apps
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.db.models import ExpressionWrapper, Q
@@ -55,6 +56,10 @@ class BaseManager:
         """Remove the given model object from the watchlist."""
         raise NotImplementedError  # pragma: no cover
 
+    def remove_object_id(self, model_watchlist, object_id):
+        """Remove the item with the given object_id from the model watchlist."""
+        raise NotImplementedError  # pragma: no cover
+
     def toggle(self, obj):
         """
         Add the given model object to the watchlist, if it is not already on it.
@@ -83,6 +88,32 @@ class BaseManager:
         watchlist_pks = self.pks(self.get_model_watchlist(queryset.model))
         expression = ExpressionWrapper(Q(pk__in=watchlist_pks), output_field=models.BooleanField())
         return queryset.annotate(on_watchlist=expression)
+
+    def prune(self):
+        """
+        Remove watchlist items that reference stale models or stale model
+        objects (i.e. objects that have since been deleted).
+        """
+        self._prune_models()
+        self._prune_model_objects()
+
+    def _prune_models(self):
+        """Remove watchlist items that reference stale models."""
+        raise NotImplementedError  # pragma: no cover
+
+    def _prune_model_objects(self):
+        """Remove watchlist items that reference stale model objects."""
+        raise NotImplementedError  # pragma: no cover
+
+    def _get_stale_pks(self, model):
+        """
+        Return the primary keys of stale model objects referenced by watchlist
+        items.
+        """
+        model_watchlist = self.get_model_watchlist(model)
+        pks = self.pks(model_watchlist)
+        existing = model.objects.filter(pk__in=pks).values_list("pk", flat=True)
+        return set(pks) - set(existing)
 
 
 class SessionManager(BaseManager):
@@ -131,16 +162,38 @@ class SessionManager(BaseManager):
     def remove(self, obj):
         if self.on_watchlist(obj):
             model_watchlist = self.get_model_watchlist(obj)
-            model_watchlist.pop(self.pks(model_watchlist).index(obj.pk))
+            self.remove_object_id(model_watchlist, obj.pk)
             if not model_watchlist:
                 del self.get_watchlist()[self._get_watchlist_label(obj)]
             self.request.session.modified = True
+
+    def remove_object_id(self, model_watchlist, object_id):
+        model_watchlist.pop(self.pks(model_watchlist).index(object_id))
+        self.request.session.modified = True
 
     def as_dict(self):
         return self.get_watchlist()  # pragma: no cover
 
     def pks(self, model_watchlist):
         return list(map(itemgetter("object_id"), model_watchlist))
+
+    def _prune_models(self):
+        watchlist = self.get_watchlist()
+        for model_label in list(watchlist.keys()):
+            try:
+                apps.get_model(model_label)
+            except LookupError:
+                del watchlist[model_label]
+
+    def _prune_model_objects(self):
+        for model_label in self.get_watchlist():
+            model = apps.get_model(model_label)
+            model_watchlist = self.get_model_watchlist(model)
+            pks = self.pks(model_watchlist)
+            existing = model.objects.filter(pk__in=pks).values_list("pk", flat=True)
+            orphaned = set(pks) - set(existing)
+            for orphan_pk in orphaned:
+                self.remove_object_id(model_watchlist, orphan_pk)
 
 
 class ModelManager(BaseManager):
@@ -168,7 +221,10 @@ class ModelManager(BaseManager):
             )
 
     def remove(self, obj):
-        self.get_model_watchlist(obj).filter(object_id=obj.pk).delete()
+        self.remove_object_id(self.get_model_watchlist(obj), obj.pk)
+
+    def remove_object_id(self, model_watchlist, object_id):
+        model_watchlist.filter(object_id=object_id).delete()
 
     def as_dict(self):
         watchlist = self.get_watchlist()
@@ -182,3 +238,20 @@ class ModelManager(BaseManager):
 
     def pks(self, model_watchlist):
         return list(model_watchlist.values_list("object_id", flat=True))
+
+    def _prune_models(self):
+        watchlist = self.get_watchlist()
+        ct_pks = watchlist.values("content_type").order_by("content_type").distinct()
+        for content_type in ContentType.objects.filter(pk__in=ct_pks):
+            if content_type.model_class() is None:
+                watchlist.filter(content_type=content_type).delete()
+
+    def _prune_model_objects(self):
+        ct_pks = self.get_watchlist().values("content_type").order_by("content_type").distinct()
+        for content_type in ContentType.objects.filter(pk__in=ct_pks):
+            model = content_type.model_class()
+            model_watchlist = self.get_model_watchlist(model)
+            pks = self.pks(model_watchlist)
+            existing = model.objects.filter(pk__in=pks).values_list("pk", flat=True)
+            orphaned = set(pks) - set(existing)
+            model_watchlist.filter(pk__in=orphaned).delete()

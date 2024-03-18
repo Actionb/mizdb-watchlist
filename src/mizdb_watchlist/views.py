@@ -38,9 +38,12 @@ class WatchlistViewMixin(ContextMixin):
         """Return the URL for the view that removes items from the watchlist."""
         return reverse("watchlist:remove")
 
-    def get_watchlist(self, request):
+    def get_watchlist(self, request, prune=True):
         """Return the watchlist in dictionary form for the given request."""
-        return get_manager(request).as_dict()
+        manager = get_manager(request)
+        if prune:
+            manager.prune()
+        return manager.as_dict()
 
     def get_watchlist_context(self, request):
         """Return template context items for display the watchlist."""

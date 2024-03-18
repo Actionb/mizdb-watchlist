@@ -46,9 +46,9 @@ class TestChangeView:
         assert_toggled_off(toggle_button)
         assert not on_watchlist_model(test_obj)
 
-    def test_is_toggled_when_already_on_watchlist(
+    def test_toggle_button_is_toggled_when_already_on_watchlist(
         self,
-        add_to_watchlist,
+        fill_watchlist,
         change_view,
         get_toggle_button,
         assert_toggled_on,

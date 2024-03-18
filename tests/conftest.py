@@ -33,8 +33,13 @@ def model_label(model) -> str:
 
 
 @pytest.fixture
-def test_obj() -> Person:
-    return PersonFactory()
+def person_factory():
+    return PersonFactory
+
+
+@pytest.fixture
+def test_obj(person_factory) -> Person:
+    return person_factory()
 
 
 @pytest.fixture
@@ -43,14 +48,24 @@ def watchlist_model():
 
 
 @pytest.fixture
-def add_to_watchlist(watchlist_model, user, test_obj):
-    """Create a Watchlist model object for the given test object."""
-    return watchlist_model.objects.create(
-        user=user,
-        content_type=ContentType.objects.get_for_model(test_obj),
-        object_id=test_obj.pk,
-        object_repr=str(test_obj),
-    )
+def fill_watchlist(add_to_watchlist, test_obj):
+    """Add the object returned by the `test_obj` fixture to the model watchlist."""
+    add_to_watchlist(test_obj)
+
+
+@pytest.fixture
+def add_to_watchlist(watchlist_model, user):
+    """Create a Watchlist model object for the given model object."""
+
+    def inner(obj):
+        return watchlist_model.objects.create(
+            user=user,
+            content_type=ContentType.objects.get_for_model(obj),
+            object_id=obj.pk,
+            object_repr=str(obj),
+        )
+
+    return inner
 
 
 ################################################################################

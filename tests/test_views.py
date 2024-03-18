@@ -57,13 +57,13 @@ class TestWatchlistViewMixin:
     def test_get_remove_url(self, view):
         assert view.get_remove_url() == reverse("watchlist:remove")
 
-    def test_get_watchlist(self, view, wsgi_request, add_to_watchlist):
+    def test_get_watchlist(self, view, wsgi_request):
         """Assert that get_watchlist calls manager.as_dict()."""
         as_dict_mock = Mock()
         get_manager_mock = Mock()
         get_manager_mock.return_value.as_dict = as_dict_mock
         with patch("mizdb_watchlist.views.get_manager", new=get_manager_mock):
-            view.get_watchlist(wsgi_request)
+            view.get_watchlist(wsgi_request, prune=False)
             get_manager_mock.assert_called()
             as_dict_mock.assert_called()
 
@@ -110,7 +110,7 @@ class TestWatchlistToggle:
         assert response.status_code == 200
         assert json.loads(response.content)["on_watchlist"]
 
-    def test_watchlist_toggle_already_on_watchlist(self, add_to_watchlist, http_request):
+    def test_watchlist_toggle_already_on_watchlist(self, http_request, fill_watchlist):
         response = watchlist_toggle(http_request)
         assert response.status_code == 200
         assert not json.loads(response.content)["on_watchlist"]
