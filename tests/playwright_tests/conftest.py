@@ -169,3 +169,11 @@ def get_remove_all_button():
         return locator.locator(".watchlist-remove-all-btn")
 
     return inner
+
+
+@pytest.fixture
+def get_watchlist_link():
+    def inner(locator):
+        return locator.get_by_role("link", name=re.compile("watchlist", re.IGNORECASE))
+
+    return inner

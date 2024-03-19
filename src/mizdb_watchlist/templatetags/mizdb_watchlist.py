@@ -10,6 +10,18 @@ from mizdb_watchlist.manager import get_manager
 register = template.Library()
 
 
+@register.inclusion_tag("mizdb_watchlist/watchlist_link.html")
+def watchlist_link(view_name: str, icon: bool = True) -> dict:
+    """
+    Provide an HTML link to the watchlist.
+
+    Args:
+        view_name (str): the view name to the watchlist overview
+        icon (bool): whether to include an icon with the link
+    """
+    return {"view_name": view_name, "icon": icon}  # pragma: no cover
+
+
 @register.inclusion_tag("mizdb_watchlist/toggle_button.html")
 def toggle_button(
     request: HttpRequest,

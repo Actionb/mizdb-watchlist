@@ -1,0 +1,7 @@
+{% extends "admin/base.html" %}
+{% load mizdb_watchlist %}
+
+{% block userlinks %}
+  {% watchlist_link 'admin:watchlist' icon=False %} /
+  {{ block.super }}
+{% endblock %}

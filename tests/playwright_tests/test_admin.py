@@ -46,14 +46,14 @@ class TestChangeView:
         assert_toggled_off(toggle_button)
         assert not on_watchlist_model(test_obj)
 
-    def test_toggle_button_is_toggled_when_already_on_watchlist(
-        self,
-        fill_watchlist,
-        change_view,
-        get_toggle_button,
-        assert_toggled_on,
-    ):
+    def test_button_toggled_when_on_watchlist(self, fill_watchlist, change_view, get_toggle_button, assert_toggled_on):
         assert_toggled_on(get_toggle_button(change_view))
+
+    def test_watchlist_link(self, change_view, get_watchlist_link):
+        watchlist_link = get_watchlist_link(change_view.locator("#user-tools"))
+        expect(watchlist_link).to_be_visible()
+        watchlist_link.click()
+        change_view.wait_for_url("**/_watchlist/", timeout=1000)
 
 
 @pytest.fixture

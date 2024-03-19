@@ -50,6 +50,7 @@ def test_story(
     edit_url,
     get_toggle_button,
     get_remove_button,
+    get_watchlist_link,
     assert_toggled_on,
     assert_toggled_off,
     model,
@@ -85,7 +86,7 @@ def test_story(
     added_ids.append(added.pk)
 
     # Go to the watchlist and confirm that the items have been added:
-    page.goto(get_url("watchlist"))
+    get_watchlist_link(page).click()
     watchlist_items = get_watchlist_items(page)
     assert watchlist_items.count() == 3
     watchlist_object_ids = [
