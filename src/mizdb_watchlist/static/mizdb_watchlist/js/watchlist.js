@@ -13,6 +13,10 @@
     })
   }
 
+  function removeModel (btn) {
+    btn.closest('.model-watchlist-container').remove()
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
     // Add handler for the toggle button:
     document.querySelectorAll('.watchlist-toggle-btn').forEach((btn) => {
@@ -41,13 +45,22 @@
             if (btn.closest('.watchlist-items-list').children.length === 1) {
               // This is the only watchlist item for that model - remove the
               // model container.
-              btn.closest('.model-watchlist-container').remove()
+              removeModel(btn)
             } else {
               // Remove just this watchlist item.
               btn.closest('.watchlist-item').remove()
             }
           }
         })
+      })
+    })
+
+    // Add handler for the 'remove all' buttons that remove all watchlist items
+    // of a particular model.
+    document.querySelectorAll('.watchlist-remove-all-btn').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault()
+        fetch(getRequest(btn)).then(response => { if (response.ok) { removeModel(btn) } })
       })
     })
   })

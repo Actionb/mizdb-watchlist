@@ -2,7 +2,7 @@
     max-width: 1320px;
 }
 
-#watchlist ul li {
+#watchlist ul li, #watchlist h2 {
     display: flex;
     justify-content: space-between;
 }

@@ -4,7 +4,10 @@
 <div id="watchlist">
     {% for model_name, watchlist_items in watchlist.items %}
     <div id="{{model_name}}-watchlist" class="model-watchlist-container">
-        <h2>{{ model_name }}</h2>
+        <h2 class="d-flex justify-content-between">
+            <span>{{ model_name }}</span>
+            <button class="btn watchlist-btn watchlist-remove-all-btn" data-url="{% url 'watchlist:remove_all' %}" data-model-label="{{ watchlist_items.0.model_label }}">{% trans 'Remove all' %}</button>
+        </h2>
         <ul class="list-group list-group-flush watchlist-items-list">
             {% for watchlist_item in watchlist_items %}
             <li class="list-group-item list-group-item-action d-flex justify-content-between watchlist-item">

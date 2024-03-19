@@ -7,7 +7,7 @@ from django.http import HttpResponse
 from django.urls import NoReverseMatch, include, path, reverse
 from django.views import View
 
-from mizdb_watchlist.views import WatchlistViewMixin, watchlist_remove, watchlist_toggle
+from mizdb_watchlist.views import WatchlistViewMixin, watchlist_remove, watchlist_remove_all, watchlist_toggle
 
 
 class WatchlistView(WatchlistViewMixin, View):
@@ -193,3 +193,22 @@ class TestWatchlistRemove:
     def test_watchlist_remove_object_does_not_exist(self, http_request, object_id):
         response = watchlist_remove(http_request)
         assert response.status_code == 200
+
+
+@pytest.mark.usefixtures("login_user", "ignore_csrf_protection")
+@pytest.mark.parametrize("request_method", ["POST"])
+class TestWatchlistRemoveAll:
+
+    def test_watchlist_remove_all(self, http_request):
+        response = watchlist_remove_all(http_request)
+        assert response.status_code == 200
+
+    @pytest.mark.parametrize("request_data", [{}])
+    def test_watchlist_remove_missing_parameters(self, http_request, request_data):
+        response = watchlist_remove_all(http_request)
+        assert response.status_code == 400
+
+    @pytest.mark.parametrize("model_label", ["foo.bar"])
+    def test_watchlist_remove_all_unknown_model(self, http_request, model_label):
+        response = watchlist_remove_all(http_request)
+        assert response.status_code == 400

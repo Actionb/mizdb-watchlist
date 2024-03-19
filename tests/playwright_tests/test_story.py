@@ -1,3 +1,5 @@
+import re
+
 import pytest
 from django.urls import include, path, reverse, reverse_lazy
 
@@ -85,10 +87,17 @@ def test_story(
     assert on_watchlist(added)
     added_ids.append(added.pk)
 
+    toggle_button = get_toggle_button(get_changelist_items(page).nth(17))
+    toggle_button.click()
+    added = model.objects.get(pk=get_object_id(toggle_button))
+    assert_toggled_on(toggle_button)
+    assert on_watchlist(added)
+    added_ids.append(added.pk)
+
     # Go to the watchlist and confirm that the items have been added:
     get_watchlist_link(page).click()
     watchlist_items = get_watchlist_items(page)
-    assert watchlist_items.count() == 3
+    assert watchlist_items.count() == 4
     watchlist_object_ids = [
         int(get_object_id(get_remove_button(watchlist_item))) for watchlist_item in get_watchlist_items(page).all()
     ]
@@ -99,7 +108,7 @@ def test_story(
     removed = model.objects.get(pk=get_object_id(remove_button))
     remove_button.click()
     watchlist_items = get_watchlist_items(page)
-    assert watchlist_items.count() == 2
+    assert watchlist_items.count() == 3
     assert not on_watchlist(removed)
 
     # Go to the edit page of a watchlist item and use the toggle button there:
@@ -115,15 +124,11 @@ def test_story(
     # Go back to the changelist, check that only the toggle buttons of
     # watchlist items are toggled.
     page.goto(get_url("changelist"))
-    assert page.locator(".on-watchlist").count() == 1
+    assert page.locator(".on-watchlist").count() == 2
 
     # Go to the watchlist again, and use the 'remove all' button:
-    page.goto(get_url("watchlist"))
+    get_watchlist_link(page).click()
     watchlist_items = get_watchlist_items(page)
-    assert watchlist_items.count() == 1
-    # TODO: enable the rest of this test after the 'remove all' button was added
-    # remove_button = watchlist_items.first.locator("button")
-    # removed = model.objects.get(pk=get_object_id(remove_button))
-    # page.locator(".remove-all").click()
-    # assert get_watchlist_items(page).count() == 0
-    # assert not on_watchlist(removed)
+    assert watchlist_items.count() == 2
+    page.get_by_text(re.compile("remove all", re.IGNORECASE)).click()
+    assert watchlist_items.count() == 0

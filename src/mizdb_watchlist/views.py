@@ -118,3 +118,14 @@ def watchlist_remove(request):
     except (LookupError, ObjectDoesNotExist):
         pass
     return HttpResponse()
+
+
+@csrf_protect
+def watchlist_remove_all(request):
+    """Remove all objects of a given model from the watchlist."""
+    try:
+        model = apps.get_model(request.POST["model_label"])
+    except (KeyError, LookupError):
+        return HttpResponseBadRequest()
+    get_manager(request).remove_model(model)
+    return HttpResponse()
