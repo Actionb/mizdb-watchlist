@@ -1,10 +1,28 @@
 import pytest
 from django.contrib import admin
-from django.urls import include, path, reverse
+from django.urls import include, path
 from playwright.sync_api import expect
 
+from mizdb_watchlist.actions import add_to_watchlist
+from mizdb_watchlist.admin import WatchlistAdmin
+from mizdb_watchlist.models import Watchlist
+from tests.testapp.models import Person
+
+site = admin.AdminSite(name="admin")
+
+
+@admin.register(Person, site=site)
+class PersonAdmin(admin.ModelAdmin):
+    actions = [add_to_watchlist]
+
+
+@admin.register(Watchlist, site=site)
+class WatchlistAdmin(WatchlistAdmin):
+    pass
+
+
 urlpatterns = [
-    path("admin/", admin.site.urls),
+    path("admin/", site.urls),
     path("mizdb_watchlist/", include("mizdb_watchlist.urls")),
 ]
 
@@ -58,11 +76,17 @@ class TestChangeView:
 
 @pytest.fixture
 def changelist_view(page, get_url, model):
-    page.goto(get_url(reverse(f"admin:{model._meta.app_label}_{model._meta.model_name}_changelist")))
+    page.goto(get_url(f"admin:{model._meta.app_label}_{model._meta.model_name}_changelist"))
     return page
 
 
 class TestAdminAction:
     """Test the 'add to watchlist' admin action."""
 
-    # TODO: add tests for 'add to watchlist' admin action
+    def test_add_to_watchlist_action(self, test_obj, changelist_view, on_watchlist_model):
+        checkboxes = changelist_view.locator(".action-checkbox").get_by_role("checkbox")
+        checkboxes.first.click()
+        changelist_form = changelist_view.locator("#changelist-form")
+        changelist_form.get_by_label("Action").select_option(value="add_to_watchlist")
+        changelist_form.get_by_role("button").click()
+        assert on_watchlist_model(test_obj)
