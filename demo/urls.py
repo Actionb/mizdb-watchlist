@@ -23,5 +23,4 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("mizdb_watchlist/", include("mizdb_watchlist.urls")),
     path("", include("app.urls")),
-    # path("accounts/", include("django.contrib.auth.urls")),
 ]
