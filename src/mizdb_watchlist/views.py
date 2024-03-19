@@ -3,7 +3,7 @@ from collections import OrderedDict
 from django.apps import apps
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
-from django.urls import reverse
+from django.urls import NoReverseMatch, reverse
 from django.views.decorators.csrf import csrf_protect
 from django.views.generic.base import ContextMixin
 
@@ -50,6 +50,7 @@ class WatchlistViewMixin(ContextMixin):
         context = {}
         watchlist = {}
         for model_label, watchlist_items in self.get_watchlist(request).items():
+            model_items = []
             try:
                 model = apps.get_model(model_label)
             except LookupError:
@@ -57,10 +58,15 @@ class WatchlistViewMixin(ContextMixin):
 
             # Add the URL to the change page of each item:
             for watchlist_item in watchlist_items:
-                watchlist_item["object_url"] = self.get_object_url(request, model, watchlist_item["object_id"])
+                try:
+                    watchlist_item["object_url"] = self.get_object_url(request, model, watchlist_item["object_id"])
+                except NoReverseMatch:
+                    continue
                 watchlist_item["model_label"] = model_label
+                model_items.append(watchlist_item)
 
-            watchlist[model._meta.verbose_name] = watchlist_items
+            if model_items:
+                watchlist[model._meta.verbose_name] = model_items
         context["watchlist"] = OrderedDict(sorted(watchlist.items()))
         context["remove_url"] = self.get_remove_url()
         return context

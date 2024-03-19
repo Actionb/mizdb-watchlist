@@ -4,7 +4,7 @@ from unittest.mock import Mock, patch
 import pytest
 from django.contrib import admin
 from django.http import HttpResponse
-from django.urls import include, path, reverse
+from django.urls import NoReverseMatch, include, path, reverse
 from django.views import View
 
 from mizdb_watchlist.views import WatchlistViewMixin, watchlist_remove, watchlist_toggle
@@ -45,6 +45,21 @@ class TestWatchlistViewMixin:
         return WatchlistViewMixin()
 
     @pytest.fixture
+    def mock_get_manager(self):
+        with patch("mizdb_watchlist.views.get_manager") as m:
+            yield m
+
+    @pytest.fixture
+    def mock_get_watchlist(self, view):
+        with patch.object(view, "get_watchlist") as m:
+            yield m
+
+    @pytest.fixture
+    def mock_get_object_url(self, view):
+        with patch.object(view, "get_object_url") as m:
+            yield m
+
+    @pytest.fixture
     def wsgi_request(self, client):
         return client.get(reverse("test:watchlist")).wsgi_request
 
@@ -57,37 +72,50 @@ class TestWatchlistViewMixin:
     def test_get_remove_url(self, view):
         assert view.get_remove_url() == reverse("watchlist:remove")
 
-    def test_get_watchlist(self, view, wsgi_request):
+    def test_get_watchlist(self, view, mock_get_manager, wsgi_request):
         """Assert that get_watchlist calls manager.as_dict()."""
         as_dict_mock = Mock()
-        get_manager_mock = Mock()
-        get_manager_mock.return_value.as_dict = as_dict_mock
-        with patch("mizdb_watchlist.views.get_manager", new=get_manager_mock):
-            view.get_watchlist(wsgi_request, prune=False)
-            get_manager_mock.assert_called()
-            as_dict_mock.assert_called()
+        mock_get_manager.return_value.as_dict = as_dict_mock
+        view.get_watchlist(wsgi_request, prune=False)
+        mock_get_manager.assert_called()
+        as_dict_mock.assert_called()
 
-    def test_get_watchlist_context(self, view, wsgi_request, model, model_label):
+    def test_get_watchlist_context(self, view, mock_get_watchlist, wsgi_request, model, model_label):
         """Assert that the `watchlist` item contains the expected data."""
-        watchlist = {model_label: [{"object_id": 1}, {"object_id": 2}]}
-        with patch.object(view, "get_watchlist", new=Mock(return_value=watchlist)):
-            context = view.get_watchlist_context(wsgi_request)
-            assert model._meta.verbose_name in context["watchlist"]
-            model_watchlist = context["watchlist"][model._meta.verbose_name]
-            assert len(model_watchlist) == 2
-            obj1, obj2 = model_watchlist
-            assert obj1["object_id"] == 1
-            assert obj1["object_url"] == reverse("test:testapp_person_change", args=[1])
-            assert obj1["model_label"] == model_label
-            assert obj2["object_id"] == 2
-            assert obj2["object_url"] == reverse("test:testapp_person_change", args=[2])
-            assert obj2["model_label"] == model_label
+        mock_get_watchlist.return_value = {model_label: [{"object_id": 1}, {"object_id": 2}]}
+        context = view.get_watchlist_context(wsgi_request)
+        assert model._meta.verbose_name in context["watchlist"]
+        model_watchlist = context["watchlist"][model._meta.verbose_name]
+        assert len(model_watchlist) == 2
+        obj1, obj2 = model_watchlist
+        assert obj1["object_id"] == 1
+        assert obj1["object_url"] == reverse("test:testapp_person_change", args=[1])
+        assert obj1["model_label"] == model_label
+        assert obj2["object_id"] == 2
+        assert obj2["object_url"] == reverse("test:testapp_person_change", args=[2])
+        assert obj2["model_label"] == model_label
 
-    def test_get_watchlist_context_ignores_unknown_models(self, view, wsgi_request):
+    def test_get_watchlist_context_ignores_unknown_models(self, view, mock_get_watchlist, wsgi_request):
         """Assert that unknown models are not included in the `watchlist` item."""
-        watchlist = {"foo.bar": [{"object_id": 1}]}
-        with patch.object(view, "get_watchlist", new=Mock(return_value=watchlist)):
-            assert not view.get_watchlist_context(wsgi_request)["watchlist"]
+        mock_get_watchlist.return_value = {"foo.bar": [{"object_id": 1}]}
+        assert not view.get_watchlist_context(wsgi_request)["watchlist"]
+
+    def test_get_watchlist_context_no_reverse_match(
+        self,
+        view,
+        mock_get_watchlist,
+        mock_get_object_url,
+        model_label,
+        wsgi_request,
+    ):
+        """
+        Assert that items are skipped if `get_object_url` raises a
+        NoReverseMatch.
+        """
+        mock_get_watchlist.return_value = {model_label: [{"object_id": 1}]}
+        mock_get_object_url.side_effect = NoReverseMatch
+        context = view.get_watchlist_context(wsgi_request)
+        assert not context["watchlist"]
 
 
 @pytest.fixture
