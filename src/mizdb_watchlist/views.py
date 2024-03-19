@@ -66,7 +66,7 @@ class WatchlistViewMixin(ContextMixin):
                 model_items.append(watchlist_item)
 
             if model_items:
-                watchlist[model._meta.verbose_name] = model_items
+                watchlist[model._meta.verbose_name.capitalize()] = model_items
         context["watchlist"] = OrderedDict(sorted(watchlist.items()))
         context["remove_url"] = self.get_remove_url()
         return context
