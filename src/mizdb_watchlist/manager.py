@@ -264,7 +264,7 @@ class ModelManager(BaseManager):
             pks = self.pks(model_watchlist)
             existing = model.objects.filter(pk__in=pks).values_list("pk", flat=True)
             orphaned = set(pks) - set(existing)
-            model_watchlist.filter(pk__in=orphaned).delete()
+            model_watchlist.filter(object_id__in=orphaned).delete()
 
     def _create(self, obj):
         """Create a Watchlist item instance for the given object."""
