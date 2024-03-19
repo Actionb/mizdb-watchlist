@@ -164,6 +164,10 @@ class TestSessionManager:
         manager.bulk_add(queryset)
         assert new1.pk in session_pks(http_request)
 
+    def test_remove_model(self, manager, model, model_label, http_request):
+        manager.remove_model(model)
+        assert not manager.get_model_watchlist(model)
+
 
 @pytest.mark.parametrize("manager_class", [ModelManager])
 class TestModelManager:
@@ -261,3 +265,7 @@ class TestModelManager:
         add_to_watchlist(obj)
         manager.bulk_add([obj])
         assert Watchlist.objects.filter(object_id=obj.pk, user=user.pk).count() == 1
+
+    def test_remove_model(self, manager, fill_watchlist, model):
+        manager.remove_model(model)
+        assert not Watchlist.objects.exists()

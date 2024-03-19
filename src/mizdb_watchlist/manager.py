@@ -120,6 +120,10 @@ class BaseManager:
         for obj in objects:
             self.add(obj)
 
+    def remove_model(self, model):
+        """Remove all watchlist items of the given model."""
+        raise NotImplementedError  # pragma: no cover
+
 
 class SessionManager(BaseManager):
     """
@@ -169,7 +173,7 @@ class SessionManager(BaseManager):
             model_watchlist = self.get_model_watchlist(obj)
             self.remove_object_id(model_watchlist, obj.pk)
             if not model_watchlist:
-                del self.get_watchlist()[self._get_watchlist_label(obj)]
+                self.remove_model(obj)
             self.request.session.modified = True
 
     def remove_object_id(self, model_watchlist, object_id):
@@ -188,7 +192,7 @@ class SessionManager(BaseManager):
             try:
                 apps.get_model(model_label)
             except LookupError:
-                del watchlist[model_label]
+                self._remove_model(model_label)
 
     def _prune_model_objects(self):
         for model_label in self.get_watchlist():
@@ -199,6 +203,12 @@ class SessionManager(BaseManager):
             orphaned = set(pks) - set(existing)
             for orphan_pk in orphaned:
                 self.remove_object_id(model_watchlist, orphan_pk)
+
+    def remove_model(self, model):
+        self._remove_model(self._get_watchlist_label(model))
+
+    def _remove_model(self, model_label):
+        del self.get_watchlist()[model_label]
 
 
 class ModelManager(BaseManager):
@@ -279,3 +289,7 @@ class ModelManager(BaseManager):
             if obj.pk not in existing[obj._meta.model]:
                 new.append(self._create(obj))
         Watchlist.objects.bulk_create(new)
+
+    def remove_model(self, model):
+        content_type = self.get_content_type(model)
+        self.get_watchlist().filter(content_type=content_type).delete()
