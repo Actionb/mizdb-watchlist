@@ -3,7 +3,7 @@ from operator import itemgetter
 from django.apps import apps
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
-from django.db.models import ExpressionWrapper, Q
+from django.db.models import ExpressionWrapper, Q, QuerySet
 
 from mizdb_watchlist.models import Watchlist
 
@@ -115,6 +115,11 @@ class BaseManager:
         existing = model.objects.filter(pk__in=pks).values_list("pk", flat=True)
         return set(pks) - set(existing)
 
+    def bulk_add(self, objects):
+        """Add the objects in `objects` to the watchlist."""
+        for obj in objects:
+            self.add(obj)
+
 
 class SessionManager(BaseManager):
     """
@@ -213,12 +218,7 @@ class ModelManager(BaseManager):
 
     def add(self, obj):
         if not self.on_watchlist(obj):
-            self.get_model_watchlist(obj).create(
-                user=self.request.user,
-                content_type=self.get_content_type(obj),
-                object_id=obj.pk,
-                object_repr=str(obj),
-            )
+            self._create(obj).save()
 
     def remove(self, obj):
         self.remove_object_id(self.get_model_watchlist(obj), obj.pk)
@@ -255,3 +255,27 @@ class ModelManager(BaseManager):
             existing = model.objects.filter(pk__in=pks).values_list("pk", flat=True)
             orphaned = set(pks) - set(existing)
             model_watchlist.filter(pk__in=orphaned).delete()
+
+    def _create(self, obj):
+        """Create a Watchlist item instance for the given object."""
+        return Watchlist(
+            user=self.request.user,
+            content_type=self.get_content_type(obj),
+            object_id=obj.pk,
+            object_repr=str(obj),
+        )
+
+    def bulk_add(self, objects):
+        if not len(objects):
+            return
+        if isinstance(objects, QuerySet):
+            _models = [objects.model]
+        else:
+            _models = set(obj._meta.model for obj in objects)
+
+        existing = {model: self.get_model_watchlist(model).values_list("object_id", flat=True) for model in _models}
+        new = []
+        for obj in objects:
+            if obj.pk not in existing[obj._meta.model]:
+                new.append(self._create(obj))
+        Watchlist.objects.bulk_create(new)

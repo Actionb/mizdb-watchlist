@@ -151,6 +151,19 @@ class TestSessionManager:
         watchlist_items.append({"object_id": 0, "objet_repr": "foo"})
         assert manager._get_stale_pks(model) == {0}
 
+    def test_bulk_add_list(self, manager, person_factory, session_pks, http_request):
+        new1 = person_factory()
+        new2 = person_factory()
+        manager.bulk_add([new1, new2])
+        assert new1.pk in session_pks(http_request)
+
+    def test_bulk_add_queryset(self, manager, person_factory, model, session_pks, http_request):
+        new1 = person_factory()
+        new2 = person_factory()
+        queryset = model.objects.filter(pk__in=[new1.pk, new2.pk])
+        manager.bulk_add(queryset)
+        assert new1.pk in session_pks(http_request)
+
 
 @pytest.mark.parametrize("manager_class", [ModelManager])
 class TestModelManager:
@@ -219,3 +232,32 @@ class TestModelManager:
         add_to_watchlist(new)
         new.delete()
         assert new_pk in manager._get_stale_pks(model)
+
+    def test_bulk_add_list(self, manager, person_factory, user):
+        new1 = person_factory()
+        new2 = person_factory()
+        manager.bulk_add([new1, new2])
+        assert Watchlist.objects.filter(object_id=new1.pk, user=user.pk)
+        assert Watchlist.objects.filter(object_id=new2.pk, user=user.pk)
+
+    def test_bulk_add_queryset(self, manager, person_factory, model, user):
+        new1 = person_factory()
+        new2 = person_factory()
+        queryset = model.objects.filter(pk__in=[new1.pk, new2.pk])
+        manager.bulk_add(queryset)
+        assert Watchlist.objects.filter(object_id=new1.pk, user=user.pk)
+        assert Watchlist.objects.filter(object_id=new2.pk, user=user.pk)
+
+    def test_bulk_add_empty_list(self, manager, django_assert_num_queries):
+        with django_assert_num_queries(0):
+            manager.bulk_add([])
+
+    def test_bulk_add_empty_queryset(self, manager, django_assert_num_queries, model):
+        with django_assert_num_queries(0):
+            manager.bulk_add(model.objects.none())
+
+    def test_bulk_add_skips_existing(self, manager, person_factory, add_to_watchlist, user):
+        obj = person_factory(id=420)
+        add_to_watchlist(obj)
+        manager.bulk_add([obj])
+        assert Watchlist.objects.filter(object_id=obj.pk, user=user.pk).count() == 1
