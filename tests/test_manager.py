@@ -168,6 +168,13 @@ class TestSessionManager:
         manager.remove_model(person_model)
         assert not manager.get_model_watchlist(person_model)
 
+    def test_filter(self, manager, person_factory, person_model, person):
+        new1 = person_factory()
+        queryset = person_model.objects.all()
+        filtered_queryset = manager.filter(queryset)
+        assert person in filtered_queryset
+        assert new1 not in filtered_queryset
+
 
 @pytest.mark.parametrize("manager_class", [ModelManager])
 class TestModelManager:
@@ -275,3 +282,10 @@ class TestModelManager:
     def test_remove_model(self, manager, fill_watchlist, person_model, person_watchlist):
         manager.remove_model(person_model)
         assert not person_watchlist.exists()
+
+    def test_filter(self, manager, fill_watchlist, person_factory, person_model, person):
+        new1 = person_factory()
+        queryset = person_model.objects.all()
+        filtered_queryset = manager.filter(queryset)
+        assert person in filtered_queryset
+        assert new1 not in filtered_queryset

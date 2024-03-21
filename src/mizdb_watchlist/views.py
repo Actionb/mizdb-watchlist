@@ -7,7 +7,9 @@ from django.urls import NoReverseMatch, reverse
 from django.views.decorators.csrf import csrf_protect
 from django.views.generic.base import ContextMixin
 
-from mizdb_watchlist.manager import get_manager
+from mizdb_watchlist.manager import ANNOTATION_FIELD, get_manager
+
+ON_WATCHLIST_VAR = ANNOTATION_FIELD
 
 
 def _get_model_object(model_label, pk):
@@ -32,7 +34,7 @@ class WatchlistViewMixin(ContextMixin):
         namespace = self.get_url_namespace(request)
         if namespace:
             viewname = f"{namespace}:{viewname}"
-        return reverse(viewname, args=[pk])
+        return reverse(viewname, args=[pk])  # TODO: needs current_app=namespace parameter?
 
     def get_remove_url(self):
         """Return the URL for the view that removes items from the watchlist."""
@@ -66,7 +68,9 @@ class WatchlistViewMixin(ContextMixin):
                 model_items.append(watchlist_item)
 
             if model_items:
-                watchlist[model._meta.verbose_name.capitalize()] = model_items
+                changelist_url = self.get_changelist_url(request, model)
+                data = {"model_items": model_items, "changelist_url": changelist_url, "model_label": model_label}
+                watchlist[model._meta.verbose_name.capitalize()] = data
         context["watchlist"] = OrderedDict(sorted(watchlist.items()))
         context["remove_url"] = self.get_remove_url()
         return context
@@ -75,6 +79,19 @@ class WatchlistViewMixin(ContextMixin):
         context = super().get_context_data(**kwargs)
         context.update(self.get_watchlist_context(self.request))  # noqa
         return context
+
+    def get_changelist_url(self, request, model):
+        """
+        Return the URL to the changelist of the given model.
+
+        Append a query parameter to filter the changelist queryset to only
+        include watchlist items.
+        """
+        view_name = f"{model._meta.app_label}_{model._meta.model_name}_changelist"
+        if namespace := request.resolver_match.namespace:
+            view_name = f"{namespace}:{view_name}"
+        url = reverse(view_name)  # TODO: needs current_app=namespace parameter?
+        return f"{url}?{ON_WATCHLIST_VAR}=True"
 
 
 @csrf_protect

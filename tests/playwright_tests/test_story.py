@@ -16,8 +16,9 @@ def dummy_view(*_args):
 
 
 urlpatterns = [
-    path("", Changelist.as_view(), name="changelist"),
+    path("person/", Changelist.as_view(), name="testapp_person_changelist"),
     path("person/<int:pk>/edit/", EditView.as_view(), name="testapp_person_change"),
+    path("company/", dummy_view, name="testapp_company_changelist"),
     path("company/<int:pk>/edit/", dummy_view, name="testapp_company_change"),
     path("watchlist/", WatchlistView.as_view(), name="watchlist"),
     path("mizdb_watchlist/", include("mizdb_watchlist.urls")),
@@ -62,6 +63,11 @@ def get_object_id(button):
     return button.get_attribute("data-object-id")
 
 
+def get_changelist_link(locator):
+    """Return the changelist link of the model watchlist."""
+    return locator.locator(".watchlist-changelist-btn")
+
+
 @pytest.fixture
 def add_company(rf, user, get_session_cookie, company, logged_in):
     """Add a Company object to the watchlist."""
@@ -82,15 +88,15 @@ def add_company(rf, user, get_session_cookie, company, logged_in):
 
 
 @pytest.fixture
-def changelist(page, get_url):
-    page.goto(get_url("changelist"))
-    return page
+def changelist_url(get_url):
+    return get_url("testapp_person_changelist")
 
 
 @pytest.mark.parametrize("logged_in", [True, False])
 def test_story(
     request,
     page,
+    changelist_url,
     get_url,
     edit_url,
     get_toggle_button,
@@ -106,7 +112,7 @@ def test_story(
     if logged_in:
         request.getfixturevalue("session_login")
     # Toggle a few items on the changelist:
-    page.goto(get_url("changelist"))
+    page.goto(changelist_url)
     # Add a company to the watchlist:
     add_company()
 
@@ -168,9 +174,11 @@ def test_story(
     assert_toggled_off(toggle_button)
     assert not on_watchlist(removed)
 
-    # Go back to the changelist, check that only the toggle buttons of
-    # watchlist items are toggled.
-    page.goto(get_url("changelist"))
+    # Go back to the watchlist, use the changelist button there to go back to
+    # a changelist filtered to only show the watchlist items:
+    get_watchlist_link(page).click()
+    get_changelist_link(get_person_watchlist(page)).click()
+    expect(get_changelist_items(page)).to_have_count(2)
     expect(page.locator(".on-watchlist")).to_have_count(2)
 
     # Go to the watchlist again, and use the 'remove all' button:

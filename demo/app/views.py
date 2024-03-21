@@ -1,7 +1,7 @@
 from django import forms, views
 
 from mizdb_watchlist.manager import get_manager
-from mizdb_watchlist.views import WatchlistViewMixin
+from mizdb_watchlist.views import ON_WATCHLIST_VAR, WatchlistViewMixin
 
 from .models import Person
 
@@ -11,7 +11,11 @@ class Changelist(views.generic.ListView):
     template_name = "changelist.html"
 
     def get_queryset(self):
-        return get_manager(self.request).annotate_queryset(super().get_queryset())
+        manager = get_manager(self.request)
+        queryset = manager.annotate_queryset(super().get_queryset())
+        if ON_WATCHLIST_VAR in self.request.GET:
+            queryset = manager.filter(queryset)
+        return queryset
 
 
 class EditView(views.generic.UpdateView):

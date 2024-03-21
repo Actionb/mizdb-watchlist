@@ -2,14 +2,17 @@
 {% csrf_token %}
 
 <div id="watchlist">
-    {% for model_name, watchlist_items in watchlist.items %}
+    {% for model_name, watchlist_data in watchlist.items %}
     <div id="{{model_name}}-watchlist" class="model-watchlist-container">
-        <h2 class="d-flex justify-content-between">
-            <span>{{ model_name }}</span>
-            <button class="btn watchlist-btn watchlist-remove-all-btn" data-url="{% url 'watchlist:remove_all' %}" data-model-label="{{ watchlist_items.0.model_label }}">{% trans 'Remove all' %}</button>
-        </h2>
+        <div class="d-flex justify-content-between">
+            <div class="d-flex justify-content-between">
+                <h2>{{ model_name }}</h2>
+                <a class="btn btn-link my-auto watchlist-btn watchlist-changelist-btn" href="{{ watchlist_data.changelist_url }}">{% trans 'Changelist' %}</a>
+            </div>
+            <button class="btn watchlist-btn watchlist-remove-all-btn" data-url="{% url 'watchlist:remove_all' %}" data-model-label="{{ watchlist_data.model_label }}">{% trans 'Remove all' %}</button>
+        </div>
         <ul class="list-group list-group-flush watchlist-items-list">
-            {% for watchlist_item in watchlist_items %}
+            {% for watchlist_item in watchlist_data.model_items %}
             <li class="list-group-item list-group-item-action d-flex justify-content-between watchlist-item">
                 <a href="{{ watchlist_item.object_url }}" class="text-decoration-none my-auto">{{ watchlist_item.object_repr }}</a>
                 <button class="btn text-danger watchlist-btn watchlist-remove-btn" title="{% translate 'Remove from watchlist' %}" data-url="{{ remove_url }}" data-object-id="{{ watchlist_item.object_id }}" data-model-label="{{ watchlist_item.model_label }}">

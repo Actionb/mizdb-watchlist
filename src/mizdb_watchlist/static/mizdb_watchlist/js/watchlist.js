@@ -13,8 +13,12 @@
     })
   }
 
+  function getModelContainer (btn) {
+    return btn.closest('.model-watchlist-container')
+  }
+
   function removeModel (btn) {
-    btn.closest('.model-watchlist-container').remove()
+    getModelContainer(btn).remove()
   }
 
   document.addEventListener('DOMContentLoaded', () => {

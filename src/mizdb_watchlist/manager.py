@@ -8,6 +8,7 @@ from django.db.models import ExpressionWrapper, Q, QuerySet
 from mizdb_watchlist.models import Watchlist
 
 WATCHLIST_SESSION_KEY = "watchlist"
+ANNOTATION_FIELD = "on_watchlist"
 
 
 def get_manager(request):
@@ -87,7 +88,7 @@ class BaseManager:
         """
         watchlist_pks = self.pks(self.get_model_watchlist(queryset.model))
         expression = ExpressionWrapper(Q(pk__in=watchlist_pks), output_field=models.BooleanField())
-        return queryset.annotate(on_watchlist=expression)
+        return queryset.annotate(**{ANNOTATION_FIELD: expression})
 
     def prune(self):
         """
@@ -123,6 +124,15 @@ class BaseManager:
     def remove_model(self, model):
         """Remove all watchlist items of the given model."""
         raise NotImplementedError  # pragma: no cover
+
+    def filter(self, queryset):
+        """
+        Filter the given queryset to only include items that are on the
+        watchlist.
+        """
+        if ANNOTATION_FIELD not in queryset.query.annotations:
+            queryset = self.annotate_queryset(queryset)
+        return queryset.filter(**{ANNOTATION_FIELD: True})
 
 
 class SessionManager(BaseManager):

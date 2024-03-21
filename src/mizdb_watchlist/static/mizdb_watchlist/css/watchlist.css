@@ -2,11 +2,6 @@
     max-width: 1320px;
 }
 
-#watchlist ul li, #watchlist h2 {
-    display: flex;
-    justify-content: space-between;
-}
-
 #watchlist ul li:not(:last-child) {
     border-bottom: 1px solid lightgray;
 }
@@ -37,4 +32,17 @@
 
 .watchlist-toggle-btn.on-watchlist {
     color: rgb(24, 188, 156);
+}
+
+.d-flex {
+    display: flex;
+}
+
+.justify-content-between {
+    justify-content: space-between;
+}
+
+.my-auto {
+    margin-top: auto;
+    margin-bottom: auto;
 }

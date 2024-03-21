@@ -73,6 +73,7 @@ def fill_watchlist(add_to_watchlist, person, company):
     """Add the object returned by the `test_obj` fixture to the model watchlist."""
     add_to_watchlist(person)
     add_to_watchlist(company)
+    return person, company
 
 
 @pytest.fixture

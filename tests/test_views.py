@@ -7,6 +7,7 @@ from django.http import HttpResponse
 from django.urls import NoReverseMatch, include, path, reverse
 from django.views import View
 
+from mizdb_watchlist.manager import ANNOTATION_FIELD
 from mizdb_watchlist.views import WatchlistViewMixin, watchlist_remove, watchlist_remove_all, watchlist_toggle
 
 
@@ -26,6 +27,7 @@ class URLConf:
     urlpatterns = [
         path("watchlist/", WatchlistView.as_view(), name="watchlist"),
         path("person/<int:pk>/change/", dummy_view, name="testapp_person_change"),
+        path("person/", dummy_view, name="testapp_person_changelist"),
     ]
 
 
@@ -85,7 +87,10 @@ class TestWatchlistViewMixin:
         mock_get_watchlist.return_value = {person_label: [{"object_id": 1}, {"object_id": 2}]}
         context = view.get_watchlist_context(wsgi_request)
         assert person_model._meta.verbose_name in context["watchlist"]
-        model_watchlist = context["watchlist"][person_model._meta.verbose_name]
+        watchlist_data = context["watchlist"][person_model._meta.verbose_name]
+        expected_url = f"{reverse('test:testapp_person_changelist')}?{ANNOTATION_FIELD}=True"
+        assert watchlist_data["changelist_url"] == expected_url
+        model_watchlist = watchlist_data["model_items"]
         assert len(model_watchlist) == 2
         obj1, obj2 = model_watchlist
         assert obj1["object_id"] == 1
