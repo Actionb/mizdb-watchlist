@@ -1,0 +1,75 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-03-21 12:51+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: src/mizdb_watchlist/actions.py:7
+#, python-format
+msgid "Add selected %(verbose_name_plural)s to my watchlist"
+msgstr "Ausgewählte %(verbose_name_plural)s zu meiner Merkliste hinzufügen"
+
+#: src/mizdb_watchlist/actions.py:14
+msgid "Successfully added to my watchlist."
+msgstr "Erfolgreich zu meiner Merkliste hinzugefügt."
+
+#: src/mizdb_watchlist/admin.py:32
+msgid "My watchlist"
+msgstr "Meine Merkliste"
+
+#: src/mizdb_watchlist/models.py:10
+msgid "Object ID"
+msgstr "Objekt ID"
+
+#: src/mizdb_watchlist/models.py:11
+msgid "Object representation"
+msgstr "Objekt Repräsentation"
+
+#: src/mizdb_watchlist/models.py:12
+msgid "Added at"
+msgstr "Hinzugefügt am"
+
+#: src/mizdb_watchlist/models.py:19
+msgid "Watchlist Item"
+msgstr "Merkliste Objekt"
+
+#: src/mizdb_watchlist/models.py:20
+msgid "Watchlist Items"
+msgstr "Merkliste Objekte"
+
+#: src/mizdb_watchlist/templates/mizdb_watchlist/toggle_button.html:4
+msgid "Toggle watchlist"
+msgstr "Zu Merkliste hinzufügen/entfernen"
+
+#: src/mizdb_watchlist/templates/mizdb_watchlist/watchlist.html:10
+msgid "Changelist"
+msgstr "Änderungsliste"
+
+#: src/mizdb_watchlist/templates/mizdb_watchlist/watchlist.html:12
+msgid "Remove all"
+msgstr "Alle entfernen"
+
+#: src/mizdb_watchlist/templates/mizdb_watchlist/watchlist.html:18
+msgid "Remove from watchlist"
+msgstr "Von Merkliste entfernen"
+
+#: src/mizdb_watchlist/templates/mizdb_watchlist/watchlist_link.html:4
+msgid "My Watchlist"
+msgstr "Meine Merkliste"
+
+#~ msgid "Additional Notes"
+#~ msgstr "Weitere Vermerke"
