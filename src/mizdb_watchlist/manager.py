@@ -209,6 +209,7 @@ class SessionManager(BaseManager):
 
     def _remove_model(self, model_label):
         del self.get_watchlist()[model_label]
+        self.request.session.modified = True
 
 
 class ModelManager(BaseManager):

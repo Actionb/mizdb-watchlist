@@ -178,6 +178,8 @@ def test_story(
     watchlist_items = get_person_watchlist_items(page)
     expect(watchlist_items).to_have_count(2)
     get_person_watchlist(page).get_by_text(re.compile("remove all", re.IGNORECASE)).click()
+    # Reload the watchlist:
+    get_watchlist_link(page).click()
     expect(watchlist_items).to_have_count(0)
 
     # The company should still be listed:
