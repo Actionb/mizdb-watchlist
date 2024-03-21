@@ -6,7 +6,6 @@ from django.contrib.auth.models import AnonymousUser
 from django.contrib.contenttypes.models import ContentType
 
 from mizdb_watchlist.manager import WATCHLIST_SESSION_KEY, ModelManager, SessionManager, get_manager
-from mizdb_watchlist.models import Watchlist
 
 pytestmark = pytest.mark.django_db
 
@@ -180,8 +179,8 @@ class TestSessionManager:
 class TestModelManager:
 
     @pytest.fixture
-    def person_watchlist(self, person_ct, user):
-        return Watchlist.objects.filter(content_type=person_ct, user_id=user.pk)
+    def person_watchlist(self, watchlist_model, person_ct, user):
+        return watchlist_model.objects.filter(content_type=person_ct, user_id=user.pk)
 
     def test_on_watchlist(self, manager, fill_watchlist, person):
         assert manager.on_watchlist(person)
@@ -228,12 +227,12 @@ class TestModelManager:
         assert model_watchlist[0]["object_repr"] == str(person)
         assert model_watchlist[0]["notes"] == ""
 
-    def test_prune_models(self, manager, fill_watchlist, user, person_ct):
+    def test_prune_models(self, watchlist_model, manager, fill_watchlist, user, person_ct):
         ct = ContentType.objects.create(app_label="foo", model="bar")
-        Watchlist.objects.create(user=user, content_type=ct, object_id=0, object_repr="foo")
+        watchlist_model.objects.create(user=user, content_type=ct, object_id=0, object_repr="foo")
         manager._prune_models()
-        assert not Watchlist.objects.filter(content_type=ct).exists()
-        assert Watchlist.objects.filter(content_type=person_ct).exists()
+        assert not watchlist_model.objects.filter(content_type=ct).exists()
+        assert watchlist_model.objects.filter(content_type=person_ct).exists()
 
     def test_prune_model_objects(self, manager, fill_watchlist, person_factory, add_to_watchlist, person_watchlist):
         new = person_factory()
