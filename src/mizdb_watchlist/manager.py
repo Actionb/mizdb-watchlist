@@ -254,7 +254,7 @@ class ModelManager(BaseManager):
             ct = ContentType.objects.get(pk=ct_id)
             model = ct.model_class()
             model_watchlist = self.get_model_watchlist(model)
-            result[model._meta.label_lower] = list(model_watchlist.values("object_id", "object_repr", "notes"))
+            result[model._meta.label_lower] = list(model_watchlist.values("object_id", "object_repr"))
         return result
 
     def pks(self, model_watchlist):

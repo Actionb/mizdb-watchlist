@@ -10,7 +10,6 @@ class Watchlist(models.Model):
     object_id = models.IntegerField(verbose_name=_("Object ID"))
     object_repr = models.CharField(max_length=200, verbose_name=_("Object representation"))
     time_added = models.DateTimeField(auto_now_add=True, verbose_name=_("Added at"))
-    notes = models.TextField(blank=True, verbose_name=_("Additional Notes"))
 
     def __str__(self):
         return f"{self.content_type.name}: {self.object_repr}"  # pragma: no cover

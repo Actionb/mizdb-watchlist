@@ -22,7 +22,6 @@ class Migration(migrations.Migration):
                 ("object_id", models.IntegerField(verbose_name="Object ID")),
                 ("object_repr", models.CharField(max_length=200, verbose_name="Object representation")),
                 ("time_added", models.DateTimeField(auto_now_add=True, verbose_name="Added at")),
-                ("notes", models.TextField(blank=True, verbose_name="Additional Notes")),
                 (
                     "content_type",
                     models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="contenttypes.contenttype"),

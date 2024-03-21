@@ -225,7 +225,6 @@ class TestModelManager:
         assert len(model_watchlist) == 1
         assert model_watchlist[0]["object_id"] == person.pk
         assert model_watchlist[0]["object_repr"] == str(person)
-        assert model_watchlist[0]["notes"] == ""
 
     def test_prune_models(self, watchlist_model, manager, fill_watchlist, user, person_ct):
         ct = ContentType.objects.create(app_label="foo", model="bar")
