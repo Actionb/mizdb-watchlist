@@ -35,8 +35,8 @@ pytestmark = [
 
 
 @pytest.fixture
-def change_view(page, get_url, test_obj):
-    page.goto(get_url(f"admin:{test_obj._meta.app_label}_{test_obj._meta.model_name}_change", args=[test_obj.pk]))
+def change_view(page, get_url, person):
+    page.goto(get_url(f"admin:{person._meta.app_label}_{person._meta.model_name}_change", args=[person.pk]))
     return page
 
 
@@ -53,16 +53,16 @@ class TestChangeView:
         assert_toggled_on,
         assert_toggled_off,
         on_watchlist_model,
-        test_obj,
+        person,
     ):
         toggle_button = get_toggle_button(change_view)
         toggle_button.click()
         assert_toggled_on(toggle_button)
-        assert on_watchlist_model(test_obj)
+        assert on_watchlist_model(person)
         toggle_button = get_toggle_button(change_view)
         toggle_button.click()
         assert_toggled_off(toggle_button)
-        assert not on_watchlist_model(test_obj)
+        assert not on_watchlist_model(person)
 
     def test_button_toggled_when_on_watchlist(self, fill_watchlist, change_view, get_toggle_button, assert_toggled_on):
         assert_toggled_on(get_toggle_button(change_view))
@@ -75,18 +75,18 @@ class TestChangeView:
 
 
 @pytest.fixture
-def changelist_view(page, get_url, model):
-    page.goto(get_url(f"admin:{model._meta.app_label}_{model._meta.model_name}_changelist"))
+def changelist_view(page, get_url, person_model):
+    page.goto(get_url(f"admin:{person_model._meta.app_label}_{person_model._meta.model_name}_changelist"))
     return page
 
 
 class TestAdminAction:
     """Test the 'add to watchlist' admin action."""
 
-    def test_add_to_watchlist_action(self, test_obj, changelist_view, on_watchlist_model):
+    def test_add_to_watchlist_action(self, person, changelist_view, on_watchlist_model):
         checkboxes = changelist_view.locator(".action-checkbox").get_by_role("checkbox")
         checkboxes.first.click()
         changelist_form = changelist_view.locator("#changelist-form")
         changelist_form.get_by_label("Action").select_option(value="add_to_watchlist")
         changelist_form.get_by_role("button").click()
-        assert on_watchlist_model(test_obj)
+        assert on_watchlist_model(person)

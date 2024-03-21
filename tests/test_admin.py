@@ -10,9 +10,7 @@ from mizdb_watchlist.models import Watchlist
 site = admin.AdminSite(name="test_admin")
 
 
-@admin.register(Watchlist, site=site)
-class WatchlistAdmin(WatchlistAdmin):
-    pass
+admin.register(Watchlist, site=site)(WatchlistAdmin)
 
 
 urlpatterns = [path("", site.urls), path("watchlist", include("mizdb_watchlist.urls"))]
@@ -22,6 +20,7 @@ pytestmark = [pytest.mark.urls(__name__)]
 
 @pytest.fixture
 def model_admin():
+    """Return a WatchlistAdmin instance."""
     return WatchlistAdmin(Watchlist, site)
 
 
@@ -39,13 +38,24 @@ def mock_each_context():
 
 @pytest.fixture
 def watchlist_response(http_request, model_admin):
+    """Call model_admin.watchlist and return the response."""
     return model_admin.watchlist(http_request)
 
 
 @pytest.mark.usefixtures("mock_each_context", "mock_get_watchlist_context")
 class TestWatchlistAdmin:
 
-    def test_watchlist_url(self):
+    def test_media_contains_required_files(self, model_admin):
+        media = model_admin.media
+        assert "mizdb_watchlist/js/watchlist.js" in media._js
+        assert "mizdb_watchlist/css/watchlist.css" in media._css["all"]
+
+    def test_get_urls_includes_watchlist_url(self, model_admin):
+        pattern = model_admin.get_urls()[0]
+        assert pattern.name == "watchlist"
+        assert pattern.lookup_str == "mizdb_watchlist.admin.WatchlistAdmin.watchlist"
+
+    def test_watchlist_url_reversible(self):
         assert reverse("admin:watchlist")
 
     def test_watchlist_context(self, watchlist_response):

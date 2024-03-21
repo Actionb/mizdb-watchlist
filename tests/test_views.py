@@ -66,13 +66,13 @@ class TestWatchlistViewMixin:
     def test_get_url_namespace(self, view, wsgi_request):
         assert view.get_url_namespace(wsgi_request) == "test"
 
-    def test_get_object_url(self, view, wsgi_request, model, test_obj):
-        assert view.get_object_url(wsgi_request, model, test_obj.pk) == f"/person/{test_obj.pk}/change/"
+    def test_get_object_url(self, view, wsgi_request, person_model, person):
+        assert view.get_object_url(wsgi_request, person_model, person.pk) == f"/person/{person.pk}/change/"
 
     def test_get_remove_url(self, view):
         assert view.get_remove_url() == reverse("watchlist:remove")
 
-    def test_get_watchlist(self, view, mock_get_manager, wsgi_request):
+    def test_get_watchlist_calls_as_dict(self, view, mock_get_manager, wsgi_request):
         """Assert that get_watchlist calls manager.as_dict()."""
         as_dict_mock = Mock()
         mock_get_manager.return_value.as_dict = as_dict_mock
@@ -80,20 +80,20 @@ class TestWatchlistViewMixin:
         mock_get_manager.assert_called()
         as_dict_mock.assert_called()
 
-    def test_get_watchlist_context(self, view, mock_get_watchlist, wsgi_request, model, model_label):
+    def test_get_watchlist_context(self, view, mock_get_watchlist, wsgi_request, person_model, person_label):
         """Assert that the `watchlist` item contains the expected data."""
-        mock_get_watchlist.return_value = {model_label: [{"object_id": 1}, {"object_id": 2}]}
+        mock_get_watchlist.return_value = {person_label: [{"object_id": 1}, {"object_id": 2}]}
         context = view.get_watchlist_context(wsgi_request)
-        assert model._meta.verbose_name in context["watchlist"]
-        model_watchlist = context["watchlist"][model._meta.verbose_name]
+        assert person_model._meta.verbose_name in context["watchlist"]
+        model_watchlist = context["watchlist"][person_model._meta.verbose_name]
         assert len(model_watchlist) == 2
         obj1, obj2 = model_watchlist
         assert obj1["object_id"] == 1
         assert obj1["object_url"] == reverse("test:testapp_person_change", args=[1])
-        assert obj1["model_label"] == model_label
+        assert obj1["model_label"] == person_label
         assert obj2["object_id"] == 2
         assert obj2["object_url"] == reverse("test:testapp_person_change", args=[2])
-        assert obj2["model_label"] == model_label
+        assert obj2["model_label"] == person_label
 
     def test_get_watchlist_context_ignores_unknown_models(self, view, mock_get_watchlist, wsgi_request):
         """Assert that unknown models are not included in the `watchlist` item."""
@@ -105,28 +105,28 @@ class TestWatchlistViewMixin:
         view,
         mock_get_watchlist,
         mock_get_object_url,
-        model_label,
+        person_label,
         wsgi_request,
     ):
         """
         Assert that items are skipped if `get_object_url` raises a
         NoReverseMatch.
         """
-        mock_get_watchlist.return_value = {model_label: [{"object_id": 1}]}
+        mock_get_watchlist.return_value = {person_label: [{"object_id": 1}]}
         mock_get_object_url.side_effect = NoReverseMatch
         context = view.get_watchlist_context(wsgi_request)
         assert not context["watchlist"]
 
 
 @pytest.fixture
-def request_data(request, object_id, model_label):
+def request_data(request, object_id, person_label):
     # Overwrites the default data for the http_request fixture.
-    return {"object_id": object_id, "model_label": model_label}
+    return {"object_id": object_id, "model_label": person_label}
 
 
 @pytest.fixture
-def object_id(test_obj):
-    return test_obj.pk
+def object_id(person):
+    return person.pk
 
 
 @pytest.mark.usefixtures("login_user", "ignore_csrf_protection")
@@ -153,8 +153,8 @@ class TestWatchlistToggle:
         response = watchlist_toggle(http_request)
         assert response.status_code == 400
 
-    @pytest.mark.parametrize("model_label", ["foo.bar"])
-    def test_watchlist_toggle_unknown_model(self, http_request, model_label):
+    @pytest.mark.parametrize("person_label", ["foo.bar"])
+    def test_watchlist_toggle_unknown_model(self, http_request, person_label):
         response = watchlist_toggle(http_request)
         assert response.status_code == 200
         assert not json.loads(response.content)["on_watchlist"]
@@ -184,8 +184,8 @@ class TestWatchlistRemove:
         response = watchlist_remove(http_request)
         assert response.status_code == 400
 
-    @pytest.mark.parametrize("model_label", ["foo.bar"])
-    def test_watchlist_remove_unknown_model(self, http_request, model_label):
+    @pytest.mark.parametrize("person_label", ["foo.bar"])
+    def test_watchlist_remove_unknown_model(self, http_request, person_label):
         response = watchlist_remove(http_request)
         assert response.status_code == 200
 
@@ -208,7 +208,7 @@ class TestWatchlistRemoveAll:
         response = watchlist_remove_all(http_request)
         assert response.status_code == 400
 
-    @pytest.mark.parametrize("model_label", ["foo.bar"])
-    def test_watchlist_remove_all_unknown_model(self, http_request, model_label):
+    @pytest.mark.parametrize("person_label", ["foo.bar"])
+    def test_watchlist_remove_all_unknown_model(self, http_request, person_label):
         response = watchlist_remove_all(http_request)
         assert response.status_code == 400

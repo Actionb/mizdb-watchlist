@@ -4,7 +4,7 @@ from operator import itemgetter
 
 import pytest
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.sessions.models import Session
+from django.contrib.sessions.backends.db import SessionStore
 from django.urls import reverse
 from playwright.sync_api import expect
 
@@ -58,22 +58,36 @@ def on_watchlist_model(watchlist_model):
 
 
 @pytest.fixture
-def get_session():
+def get_session_cookie(context):
+    """Return the cookie with the session id."""
+
     def inner():
-        # TODO: how to get the right session key in case that there is more
-        #  than one session?
-        return Session.objects.get()
+
+        try:
+            return next(c for c in context.cookies() if c["name"] == "sessionid")
+        except StopIteration:
+            raise Exception("No session cookie!")
 
     return inner
 
 
 @pytest.fixture
-def on_watchlist_session(get_session, model_label):
+def get_session(get_session_cookie):
+    """Return the SessionStore object for the current request session."""
+
+    def inner():
+        return SessionStore(session_key=get_session_cookie()["value"])
+
+    return inner
+
+
+@pytest.fixture
+def on_watchlist_session(get_session):
     """Return whether the given object is on the session watchlist."""
 
     def inner(obj):
         try:
-            watchlist = get_session().get_decoded()["watchlist"][model_label]
+            watchlist = get_session()["watchlist"][obj._meta.label_lower]
         except KeyError:
             return False
         return obj.pk in list(map(itemgetter("object_id"), watchlist))
@@ -108,14 +122,9 @@ def on_watchlist(logged_in, on_watchlist_session, on_watchlist_model):
 
 
 @pytest.fixture
-def toggle_button_selector():
-    return ".watchlist-toggle-btn"
-
-
-@pytest.fixture
-def get_toggle_button(toggle_button_selector):
+def get_toggle_button():
     def inner(locator):
-        return locator.locator(toggle_button_selector)
+        return locator.locator(".watchlist-toggle-btn")
 
     return inner
 

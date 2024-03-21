@@ -18,7 +18,7 @@ def _get_model_object(model_label, pk):
 class WatchlistViewMixin(ContextMixin):
     """A view mixin that adds template context items for displaying the watchlist."""
 
-    def get_url_namespace(self, request):
+    def get_url_namespace(self, request):  # TODO: remove - use request.resolver_match.namespace directly
         """Return the namespace of the given request."""
         return request.resolver_match.namespace
 

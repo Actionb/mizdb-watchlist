@@ -2,8 +2,8 @@ import pytest
 from django.contrib.contenttypes.models import ContentType
 
 from mizdb_watchlist.models import Watchlist
-from tests.factories import PersonFactory
-from tests.testapp.models import Person
+from tests.factories import CompanyFactory, PersonFactory
+from tests.testapp.models import Company, Person
 
 
 def _try_getfixturevalue(request, name):
@@ -23,23 +23,44 @@ def _try_getfixturevalue(request, name):
 
 
 @pytest.fixture
-def model() -> type[Person]:
+def person_model() -> type[Person]:
     return Person
 
 
 @pytest.fixture
-def model_label(model) -> str:
-    return model._meta.label_lower
+def person_label() -> str:
+    """Return the label_lower of the Person model."""
+    return Person._meta.label_lower
 
 
 @pytest.fixture
 def person_factory():
+    """Return the factory for the Person model."""
     return PersonFactory
 
 
 @pytest.fixture
-def test_obj(person_factory) -> Person:
+def person(person_factory) -> Person:
+    """Create and return a Person instance."""
     return person_factory()
+
+
+@pytest.fixture
+def person_ct():
+    """Return the ContentType for the Person model."""
+    return ContentType.objects.get_for_model(Person)
+
+
+@pytest.fixture
+def company_factory():
+    """Return the factory for the Company model."""
+    return CompanyFactory
+
+
+@pytest.fixture
+def company(company_factory) -> Company:
+    """Create and return a Company instance."""
+    return company_factory()
 
 
 @pytest.fixture
@@ -48,9 +69,10 @@ def watchlist_model():
 
 
 @pytest.fixture
-def fill_watchlist(add_to_watchlist, test_obj):
+def fill_watchlist(add_to_watchlist, person, company):
     """Add the object returned by the `test_obj` fixture to the model watchlist."""
-    add_to_watchlist(test_obj)
+    add_to_watchlist(person)
+    add_to_watchlist(company)
 
 
 @pytest.fixture
@@ -134,6 +156,7 @@ def http_request(rf, request, path, request_method, request_data, user):
 
 @pytest.fixture
 def ignore_csrf_protection(http_request):
+    """Disable CSRF checks on the given request."""
     http_request.csrf_processing_done = True
     return http_request
 
