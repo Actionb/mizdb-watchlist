@@ -71,9 +71,6 @@ class TestWatchlistViewMixin:
     def test_get_object_url(self, view, wsgi_request, person_model, person):
         assert view.get_object_url(wsgi_request, person_model, person.pk) == f"/person/{person.pk}/change/"
 
-    def test_get_remove_url(self, view):
-        assert view.get_remove_url() == reverse("watchlist:remove")
-
     def test_get_watchlist_calls_as_dict(self, view, mock_get_manager, wsgi_request):
         """Assert that get_watchlist calls manager.as_dict()."""
         as_dict_mock = Mock()

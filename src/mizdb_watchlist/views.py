@@ -36,10 +36,6 @@ class WatchlistViewMixin(ContextMixin):
             viewname = f"{namespace}:{viewname}"
         return reverse(viewname, args=[pk])  # TODO: needs current_app=namespace parameter?
 
-    def get_remove_url(self):
-        """Return the URL for the view that removes items from the watchlist."""
-        return reverse("watchlist:remove")
-
     def get_watchlist(self, request, prune=True):
         """Return the watchlist in dictionary form for the given request."""
         manager = get_manager(request)
@@ -72,7 +68,6 @@ class WatchlistViewMixin(ContextMixin):
                 data = {"model_items": model_items, "changelist_url": changelist_url, "model_label": model_label}
                 watchlist[model._meta.verbose_name.capitalize()] = data
         context["watchlist"] = OrderedDict(sorted(watchlist.items()))
-        context["remove_url"] = self.get_remove_url()
         return context
 
     def get_context_data(self, **kwargs):
