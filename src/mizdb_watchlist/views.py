@@ -117,9 +117,9 @@ class ListViewMixin:
     add_watchlist_annotations = True
 
     def get_queryset(self):
-        queryset = super().get_queryset()
+        queryset = super().get_queryset()  # noqa
         if self.add_watchlist_annotations:
-            queryset = annotate_view_queryset(self.request, queryset)
+            queryset = annotate_view_queryset(self.request, queryset)  # noqa
         return queryset
 
 
@@ -139,7 +139,7 @@ class ModelAdminMixin:
     add_watchlist_annotations = True
 
     def get_queryset(self, request):
-        queryset = super().get_queryset(request)
+        queryset = super().get_queryset(request)  # noqa
         if self.add_watchlist_annotations:
             queryset = annotate_view_queryset(request, queryset)
         return queryset
