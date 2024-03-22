@@ -74,9 +74,6 @@ class TestWatchlistViewMixin:
     def wsgi_request(self, client):
         return client.get(reverse("test:watchlist")).wsgi_request
 
-    def test_get_url_namespace(self, view, wsgi_request):
-        assert view.get_url_namespace(wsgi_request) == "test"
-
     def test_get_object_url(self, view, wsgi_request, person_model, person):
         assert view.get_object_url(wsgi_request, person_model, person.pk) == f"/person/{person.pk}/change/"
 

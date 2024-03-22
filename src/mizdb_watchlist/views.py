@@ -21,10 +21,6 @@ def _get_model_object(model_label, pk):
 class WatchlistViewMixin(ContextMixin):
     """A view mixin that adds template context items for displaying the watchlist."""
 
-    def get_url_namespace(self, request):  # TODO: remove - use request.resolver_match.namespace directly
-        """Return the namespace of the given request."""
-        return request.resolver_match.namespace
-
     def get_object_url(self, request, model, pk):
         """
         Return the URL to the change page of the object described by the given
@@ -32,8 +28,7 @@ class WatchlistViewMixin(ContextMixin):
         """
         opts = model._meta
         viewname = f"{opts.app_label}_{opts.model_name}_change"
-        namespace = self.get_url_namespace(request)
-        if namespace:
+        if namespace := request.resolver_match.namespace:
             viewname = f"{namespace}:{viewname}"
         return reverse(viewname, args=[pk])  # TODO: needs current_app=namespace parameter?
 
