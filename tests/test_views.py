@@ -6,9 +6,18 @@ from django.contrib import admin
 from django.http import HttpResponse
 from django.urls import NoReverseMatch, include, path, reverse
 from django.views import View
+from django.views.generic import ListView
 
 from mizdb_watchlist.manager import ANNOTATION_FIELD
-from mizdb_watchlist.views import WatchlistViewMixin, watchlist_remove, watchlist_remove_all, watchlist_toggle
+from mizdb_watchlist.views import (
+    ListViewMixin,
+    ModelAdminMixin,
+    WatchlistViewMixin,
+    watchlist_remove,
+    watchlist_remove_all,
+    watchlist_toggle,
+)
+from tests.testapp.models import Person
 
 
 class WatchlistView(WatchlistViewMixin, View):
@@ -214,3 +223,82 @@ class TestWatchlistRemoveAll:
     def test_watchlist_remove_all_unknown_model(self, http_request, person_label):
         response = watchlist_remove_all(http_request)
         assert response.status_code == 400
+
+
+@pytest.fixture
+def add_watchlist_annotations():
+    return True
+
+
+class TestListView(ListViewMixin, ListView):
+    queryset = Person.objects.all()
+
+
+class TestListViewMixin:
+
+    @pytest.fixture
+    def view(self, http_request, add_watchlist_annotations):
+        view = TestListView()
+        view.request = http_request
+        view.add_watchlist_annotations = add_watchlist_annotations
+        return view
+
+    def test_get_queryset_add_annotations(self, view):
+        assert "on_watchlist" in view.get_queryset().query.annotations
+
+    @pytest.mark.parametrize("add_watchlist_annotations", [False])
+    def test_get_queryset_not_add_annotations(self, view, add_watchlist_annotations):
+        assert "on_watchlist" not in view.get_queryset().query.annotations
+
+    @pytest.mark.parametrize("request_data", [{"on_watchlist": True}])
+    def test_get_queryset_filtered(self, view, fill_watchlist, person_factory, request_data):
+        person_on_watchlist = fill_watchlist[0]
+        person_not_on_watchlist = person_factory()
+        queryset = view.get_queryset()
+        assert person_on_watchlist in queryset
+        assert person_not_on_watchlist not in queryset
+
+    def test_get_queryset_not_filtered(self, view, fill_watchlist, person_factory):
+        person_on_watchlist = fill_watchlist[0]
+        person_not_on_watchlist = person_factory()
+        queryset = view.get_queryset()
+        assert person_on_watchlist in queryset
+        assert person_not_on_watchlist in queryset
+
+
+class TestModelAdmin(ModelAdminMixin, admin.ModelAdmin):
+    pass
+
+
+class TestModelAdminMixin:
+
+    @pytest.fixture
+    def view(self, http_request, add_watchlist_annotations):
+        view = TestModelAdmin(Person, admin.site)
+        view.add_watchlist_annotations = add_watchlist_annotations
+        return view
+
+    def test_get_queryset_add_annotations(self, view, http_request):
+        assert "on_watchlist" in view.get_queryset(http_request).query.annotations
+
+    @pytest.mark.parametrize("add_watchlist_annotations", [False])
+    def test_get_queryset_not_add_annotations(self, view, http_request, add_watchlist_annotations):
+        assert "on_watchlist" not in view.get_queryset(http_request).query.annotations
+
+    @pytest.mark.parametrize("request_data", [{"on_watchlist": True}])
+    def test_get_queryset_filtered(self, view, http_request, fill_watchlist, person_factory, request_data):
+        person_on_watchlist = fill_watchlist[0]
+        person_not_on_watchlist = person_factory()
+        queryset = view.get_queryset(http_request)
+        assert person_on_watchlist in queryset
+        assert person_not_on_watchlist not in queryset
+
+    def test_get_queryset_not_filtered(self, view, http_request, fill_watchlist, person_factory):
+        person_on_watchlist = fill_watchlist[0]
+        person_not_on_watchlist = person_factory()
+        queryset = view.get_queryset(http_request)
+        assert person_on_watchlist in queryset
+        assert person_not_on_watchlist in queryset
+
+    def test_has_action(self, view, http_request):
+        assert "add_to_watchlist" in view.get_actions(http_request)

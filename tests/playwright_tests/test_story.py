@@ -1,18 +1,35 @@
 import re
 
 import pytest
+from django import forms, views
 from django.contrib.sessions.backends.db import SessionStore
 from django.http import HttpResponse
 from django.urls import include, path, reverse
 from playwright.sync_api import expect
 
 from mizdb_watchlist.manager import get_manager
+from mizdb_watchlist.views import ListViewMixin, WatchlistViewMixin
 from tests.factories import PersonFactory
-from tests.testapp.views import Changelist, EditView, WatchlistView
+from tests.testapp.models import Person
 
 
 def dummy_view(*_args):
     return HttpResponse("This is a dummy view for tests")
+
+
+class Changelist(ListViewMixin, views.generic.ListView):
+    queryset = Person.objects.all()
+    template_name = "changelist.html"
+
+
+class EditView(views.generic.UpdateView):
+    model = Person
+    fields = forms.ALL_FIELDS
+    template_name = "edit.html"
+
+
+class WatchlistView(WatchlistViewMixin, views.generic.TemplateView):
+    template_name = "watchlist.html"
 
 
 urlpatterns = [

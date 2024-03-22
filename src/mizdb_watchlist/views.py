@@ -7,6 +7,7 @@ from django.urls import NoReverseMatch, reverse
 from django.views.decorators.csrf import csrf_protect
 from django.views.generic.base import ContextMixin
 
+from mizdb_watchlist.actions import add_to_watchlist
 from mizdb_watchlist.manager import ANNOTATION_FIELD, get_manager
 
 ON_WATCHLIST_VAR = ANNOTATION_FIELD
@@ -87,6 +88,66 @@ class WatchlistViewMixin(ContextMixin):
             view_name = f"{namespace}:{view_name}"
         url = reverse(view_name)  # TODO: needs current_app=namespace parameter?
         return f"{url}?{ON_WATCHLIST_VAR}=True"
+
+
+def annotate_view_queryset(request, queryset):
+    """
+    Add an 'on_watchlist' attribute to each object in the given queryset that
+    denotes whether the object is on a watchlist. If ``ON_WATCHLIST_VAR`` is
+    present in the request GET parameters, filter the queryset to only include
+    items that are on the watchlist.
+    """
+    manager = get_manager(request)
+    queryset = manager.annotate_queryset(queryset)
+    if ON_WATCHLIST_VAR in request.GET:
+        queryset = manager.filter(queryset)
+    return queryset
+
+
+# Requires two mixins since ModelAdmin.get_queryset takes a `request`
+# parameter while ListView.get_queryset does not. Also, opted against adding a
+# "base" mixin to keep the inheritance shallow(er).
+
+
+class ListViewMixin:
+    """
+    Add this mixin to your list views for models that use the watchlist.
+
+    Adds annotations to the queryset and applies a filter if ``ON_WATCHLIST_VAR``
+    (defaults to: 'on_watchlist') is present in the request GET parameters.
+    Set ``add_watchlist_annotations`` to ``False`` to not add annotations and
+    skip filtering.
+    """
+
+    add_watchlist_annotations = True
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        if self.add_watchlist_annotations:
+            queryset = annotate_view_queryset(self.request, queryset)
+        return queryset
+
+
+class ModelAdminMixin:
+    """
+    Add this mixin to your model admins for models that use the watchlist.
+
+    Adds annotations to the queryset and applies a filter if ``ON_WATCHLIST_VAR``
+    (defaults to: 'on_watchlist') is present in the request GET parameters.
+    Set ``add_watchlist_annotations`` to ``False`` to not add annotations and
+    skip filtering.
+
+    Adds the ``add_to_watchlist`` action to the actions.
+    """
+
+    actions = [add_to_watchlist]
+    add_watchlist_annotations = True
+
+    def get_queryset(self, request):
+        queryset = super().get_queryset(request)
+        if self.add_watchlist_annotations:
+            queryset = annotate_view_queryset(request, queryset)
+        return queryset
 
 
 @csrf_protect
