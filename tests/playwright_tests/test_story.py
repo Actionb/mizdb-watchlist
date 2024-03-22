@@ -32,12 +32,19 @@ class WatchlistView(WatchlistViewMixin, views.generic.TemplateView):
     template_name = "watchlist.html"
 
 
+class URLconf:
+    app_name = "test"
+    urlpatterns = [
+        path("person/", Changelist.as_view(), name="testapp_person_changelist"),
+        path("person/<int:pk>/edit/", EditView.as_view(), name="testapp_person_change"),
+        path("company/", dummy_view, name="testapp_company_changelist"),
+        path("company/<int:pk>/edit/", dummy_view, name="testapp_company_change"),
+        path("watchlist/", WatchlistView.as_view(), name="watchlist"),
+    ]
+
+
 urlpatterns = [
-    path("person/", Changelist.as_view(), name="testapp_person_changelist"),
-    path("person/<int:pk>/edit/", EditView.as_view(), name="testapp_person_change"),
-    path("company/", dummy_view, name="testapp_company_changelist"),
-    path("company/<int:pk>/edit/", dummy_view, name="testapp_company_change"),
-    path("watchlist/", WatchlistView.as_view(), name="watchlist"),
+    path("", include(URLconf)),
     path("mizdb_watchlist/", include("mizdb_watchlist.urls")),
 ]
 
@@ -47,7 +54,7 @@ pytestmark = [pytest.mark.django_db, pytest.mark.urls(__name__), pytest.mark.pw]
 @pytest.fixture
 def edit_url(live_server):
     def inner(pk):
-        return live_server.url + reverse("testapp_person_change", args=[pk])
+        return live_server.url + reverse("test:testapp_person_change", args=[pk])
 
     return inner
 
@@ -106,7 +113,7 @@ def add_company(rf, user, get_session_cookie, company, logged_in):
 
 @pytest.fixture
 def changelist_url(get_url):
-    return get_url("testapp_person_changelist")
+    return get_url("test:testapp_person_changelist")
 
 
 @pytest.mark.parametrize("logged_in", [True, False])
@@ -114,7 +121,6 @@ def test_story(
     request,
     page,
     changelist_url,
-    get_url,
     edit_url,
     get_toggle_button,
     get_remove_button,

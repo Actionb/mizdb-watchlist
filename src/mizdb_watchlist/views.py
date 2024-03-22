@@ -28,9 +28,9 @@ class WatchlistViewMixin(ContextMixin):
         """
         opts = model._meta
         viewname = f"{opts.app_label}_{opts.model_name}_change"
-        if namespace := request.resolver_match.namespace:
-            viewname = f"{namespace}:{viewname}"
-        return reverse(viewname, args=[pk])  # TODO: needs current_app=namespace parameter?
+        if app_name := request.resolver_match.app_name:
+            viewname = f"{app_name}:{viewname}"
+        return reverse(viewname, args=[pk], current_app=request.resolver_match.namespace)
 
     def get_watchlist(self, request, prune=True):
         """Return the watchlist in dictionary form for the given request."""
@@ -78,10 +78,10 @@ class WatchlistViewMixin(ContextMixin):
         Append a query parameter to filter the changelist queryset to only
         include watchlist items.
         """
-        view_name = f"{model._meta.app_label}_{model._meta.model_name}_changelist"
-        if namespace := request.resolver_match.namespace:
-            view_name = f"{namespace}:{view_name}"
-        url = reverse(view_name)  # TODO: needs current_app=namespace parameter?
+        viewname = f"{model._meta.app_label}_{model._meta.model_name}_changelist"
+        if app_name := request.resolver_match.app_name:
+            viewname = f"{app_name}:{viewname}"
+        url = reverse(viewname, current_app=request.resolver_match.namespace)
         return f"{url}?{ON_WATCHLIST_VAR}=True"
 
 

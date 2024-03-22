@@ -13,7 +13,7 @@
     <li class="list-group-item list-group-item-action changelist-item">
         <div class="d-flex justify-content-between">
             <input type="hidden" name="object_id" value="{{ person.pk }}">
-            <a href="{% url 'testapp_person_change' pk=person.pk %}" class="my-auto">{{ person }}</a>
+            <a href="{% url 'test:testapp_person_change' pk=person.pk %}" class="my-auto">{{ person }}</a>
             {% toggle_button view.request person on_watchlist=person.on_watchlist %}
         </div>
     </li>
