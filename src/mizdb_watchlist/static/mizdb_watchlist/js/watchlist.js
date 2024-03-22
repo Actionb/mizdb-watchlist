@@ -19,6 +19,10 @@
 
   function removeModel (btn) {
     getModelContainer(btn).remove()
+    if (!document.querySelector('.model-watchlist-container')) {
+      const emptyMessage = document.getElementById('empty-watchlist')
+      emptyMessage.style = 'display: block;'
+    }
   }
 
   document.addEventListener('DOMContentLoaded', () => {

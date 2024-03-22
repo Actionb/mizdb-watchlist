@@ -27,4 +27,5 @@
         </ul>
     </div>
     {% endfor %}
+    <p id="empty-watchlist" style="display: {% if watchlist %}none{% else %}block{% endif %};">{% translate 'There are no items on your watchlist.' %}</p>
 </div>
