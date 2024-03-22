@@ -13,7 +13,6 @@ class WatchlistAdmin(WatchlistViewMixin, admin.ModelAdmin):
     list_display = ["object_repr", "object_id", "user", "content_type", "time_added"]
     list_filter = ["user__username", "content_type"]
 
-    # TODO: include the watchlist action
     @property
     def media(self):
         media = super().media
@@ -26,7 +25,7 @@ class WatchlistAdmin(WatchlistViewMixin, admin.ModelAdmin):
         return urls
 
     def watchlist(self, request):
-        """View that displays the overview of the user's watchlist items."""
+        """The overview of the user's watchlist items."""
         context = {
             "media": self.media,
             "title": gettext("My watchlist"),
