@@ -26,17 +26,25 @@
     document.querySelectorAll('.watchlist-toggle-btn').forEach((btn) => {
       btn.addEventListener('click', (e) => {
         e.preventDefault()
-        fetch(getRequest(btn)).then(response => response.json()).then(data => {
-          if (data.on_watchlist) {
-            btn.classList.remove('text-primary')
-            btn.classList.add('text-success')
-            btn.classList.add('on-watchlist')
-          } else {
-            btn.classList.add('text-primary')
-            btn.classList.remove('text-success')
-            btn.classList.remove('on-watchlist')
-          }
-        })
+        fetch(getRequest(btn))
+          .then(response => {
+            if (!response.ok) {
+              throw new Error(`Toggle response was not ok (status code: ${response.status})`)
+            }
+            return response.json()
+          })
+          .then(data => {
+            if (data.on_watchlist) {
+              btn.classList.remove('text-primary')
+              btn.classList.add('text-success')
+              btn.classList.add('on-watchlist')
+            } else {
+              btn.classList.add('text-primary')
+              btn.classList.remove('text-success')
+              btn.classList.remove('on-watchlist')
+            }
+          })
+          .catch((error) => console.log(`Error when toggling watchlist: ${error}`))
       })
     })
 
@@ -44,18 +52,20 @@
     document.querySelectorAll('.watchlist-remove-btn').forEach((btn) => {
       btn.addEventListener('click', (e) => {
         e.preventDefault()
-        fetch(getRequest(btn)).then(response => {
-          if (response.ok) {
-            if (btn.closest('.watchlist-items-list').children.length === 1) {
+        fetch(getRequest(btn))
+          .then(response => {
+            if (response.ok) {
+              if (btn.closest('.watchlist-items-list').children.length === 1) {
               // This is the only watchlist item for that model - remove the
               // model container.
-              removeModel(btn)
-            } else {
+                removeModel(btn)
+              } else {
               // Remove just this watchlist item.
-              btn.closest('.watchlist-item').remove()
+                btn.closest('.watchlist-item').remove()
+              }
             }
-          }
-        })
+          })
+          .catch((error) => console.log(`Error when removing watchlist item: ${error}`))
       })
     })
 
@@ -64,7 +74,9 @@
     document.querySelectorAll('.watchlist-remove-all-btn').forEach((btn) => {
       btn.addEventListener('click', (e) => {
         e.preventDefault()
-        fetch(getRequest(btn)).then(response => { if (response.ok) { removeModel(btn) } })
+        fetch(getRequest(btn))
+          .then(response => { if (response.ok) { removeModel(btn) } })
+          .catch((error) => console.log(`Error when removing all watchlist items: ${error}`))
       })
     })
   })
