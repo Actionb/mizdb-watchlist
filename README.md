@@ -44,13 +44,13 @@ The `toggle_button` template tag adds a button to your page:
 ```
 The template tag takes the following arguments:
 
-| Argument               | Description                                                                               |
-|------------------------|-------------------------------------------------------------------------------------------|
-| request **(required)** | the view's request                                                                        |
-| obj **(required)**     | the model object to add or remove                                                         |
-| text                   | optional text for the button                                                              |
-| url                    | the URL for the view that handles the toggling. Defaults to `reverse("watchlist:toggle")` |
-| on_watchlist           | an optional boolean that indicates whether the item is on the watchlist                   |
+| Argument     | Default value | Description                                                                               |
+|--------------|---------------|-------------------------------------------------------------------------------------------|
+| request      | **required**  | the view's request                                                                        |
+| obj          | **required**  | the model object to add or remove                                                         |
+| text         | ""            | optional text for the button                                                              |
+| url          | None          | the URL for the view that handles the toggling. Defaults to `reverse("watchlist:toggle")` |
+| on_watchlist | None          | an optional boolean that indicates whether the item is on the watchlist                   |
 
 
 ### ListViews and the `on_watchlist` QuerySet annotation
