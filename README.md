@@ -218,6 +218,19 @@ To add a link to the watchlist overview to the admin user links, overwrite
 **NOTE**: see [Overriding admin templates](https://docs.djangoproject.com/en/5.0/ref/contrib/admin/#admin-overriding-templates) 
 for more details on how to override admin templates. 
 
+### ModelAdminMixin
+
+The `ModelAdminMixin` is the admin version of the `ListViewMixin`. The mixin adds 
+annotations and filtering (see [ListViewMixin](#listviewmixin)) to the ModelAdmin's 
+queryset.
+```python
+from mizdb_watchlist.views import ModelAdminMixin
+
+@admin.register(MyModel)
+class MyModelAdmin(ModelAdminMixin, admin.ModelAdmin):
+    pass
+```
+
 
 ## Demo & Development
 
