@@ -90,6 +90,58 @@ class MyListView(ListViewMixin, ListView):
     pass
 ```
 
+### Displaying the watchlist
+
+Add `WatchlistViewMixin` to a template view:
+```python
+from mizdb_watchlist.views import WatchlistViewMixin
+
+class MyWatchlistView(WatchlistViewMixin, TemplateView):
+    template_name = "watchlist.html"
+```
+
+Include the view in your URL conf:
+```python
+urlpatterns = [
+    ...,
+    path("watchlist/", MyWatchlistView.as_view(), name="my_watchlist"),
+]
+```
+
+Render the HTML for the watchlist in your template, for example:
+```html
+<!-- template for MyWatchlistView -->
+{% extends "base.html" %}
+{% load static %}
+
+{% block extrahead %}
+    <script src="{% static 'mizdb_watchlist/js/watchlist.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+    {% include "mizdb_watchlist/watchlist.html" %}
+{% endblock content %}
+```
+
+#### Link to the watchlist
+
+The template tag `watchlist_link` renders a hyperlink to the watchlist overview.
+You can add this to your site navigation:
+```html
+<nav>
+  <ul>
+    ...
+    <li class="nav-item">{% watchlist_link 'my_watchlist' %}</li>
+  </ul>
+</nav>
+```
+The tag takes two arguments:
+
+| Argument   | Default value | Description                                                                         |
+|------------|---------------|-------------------------------------------------------------------------------------|
+| view_name  | **required**  | the view name of the watchlist as declared in the URL conf                          |
+| icon       | True          | an optional boolean indicating whether an icon should be included in the link HTML  |
+
 ## Demo & Development
 
 Install (requires [poetry](https://python-poetry.org/docs/) and npm):
