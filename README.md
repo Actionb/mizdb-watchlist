@@ -142,6 +142,63 @@ The tag takes two arguments:
 | view_name  | **required**  | the view name of the watchlist as declared in the URL conf                          |
 | icon       | True          | an optional boolean indicating whether an icon should be included in the link HTML  |
 
+## Admin integration
+
+This library comes with a ModelAdmin for the Watchlist model. 
+The ModelAdmin also provides an admin view for the watchlist overview and adds it 
+to the ModelAdmin's URLs with the view name `watchlist`. The URL of the overview can 
+be reversed with `reverse(f"{your_admin_site.name}:watchlist")`.
+
+The ModelAdmin itself lets admins inspect and modify the (model) watchlists of 
+other users, while the overview displays the watchlist items of the current admin user.
+
+The ModelAdmin adds the `add_to_watchlist` action that lets you select items on 
+the changelist page and add them to your watchlist via admin actions.
+
+The ModelAdmin is hooked up to Django's default admin site.
+If you are not using the default admin site, make sure to register the ModelAdmin with your site:
+```python
+from django.contrib import admin
+from mizdb_watchlist.admin import WatchlistAdmin
+from mizdb_watchlist.models import Watchlist
+
+@admin.register(Watchlist, site=my_admin_site)
+class MyWatchlistAdmin(WatchlistAdmin):
+    pass
+```
+
+### Admin toggle button & watchlist link
+
+To include the toggle button on admin change pages, you can override the 
+`admin/change_form.html` template. For example like this:
+```html
+{% extends "admin/change_form.html" %}
+{% load static mizdb_watchlist %}
+
+{% block extrahead %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'mizdb_watchlist/css/watchlist.css' %}">
+  <script src="{% static 'mizdb_watchlist/js/watchlist.js' %}"></script>
+{% endblock extrahead %}
+
+{% block content_subtitle %}{% if subtitle %}<h2>{{ subtitle }} {% toggle_button request original %}</h2>{% endif %}{% endblock %}
+``` 
+
+To add a link to the watchlist overview to the admin user links, overwrite 
+`admin/base.html` like this:
+```html
+{% extends "admin/base.html" %}
+{% load mizdb_watchlist %}
+
+{% block userlinks %}
+  {% watchlist_link '<name of your admin site>:watchlist' icon=False %} /
+  {{ block.super }}
+{% endblock %}
+```
+**NOTE**: see [Overriding admin templates](https://docs.djangoproject.com/en/5.0/ref/contrib/admin/#admin-overriding-templates) 
+for more details on how to override admin templates. 
+
+
 ## Demo & Development
 
 Install (requires [poetry](https://python-poetry.org/docs/) and npm):
