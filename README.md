@@ -2,9 +2,6 @@
 
 Django model and views that implement a "watchlist" of other Django objects.
 
-For authenticated users, the watchlist items are stored in the Watchlist model. 
-For unauthenticated users, the watchlist is stored in a local Django session instead.
-
 ## Installation
 
 Install using pip:
@@ -24,8 +21,19 @@ NOTE: ensure that Django's SessionMiddleware is [enabled](https://docs.djangopro
 
 ## How to use
 
-This library provides a toggle button for adding individual items, as well as a list action for adding
-multiple items, and a default template for rendering the watchlist. 
+This library provides a toggle button for adding individual items, as well as a 
+list action for adding multiple items, and a default template for rendering the 
+overview over what's on the watchlist. 
+
+The watchlist items are stored in a Watchlist model for authenticated users. 
+For unauthenticated users, the watchlist is stored in a local Django session instead.
+
+The `mizdb_watchlist/js/watchlist.js` javascript drives the toggle button and the
+buttons on the watchlist overview.
+
+The styling was written with Bootstrap in mind. Alternatively, some rudimentary
+styling is provided with `mizdb_watchlist/css/watchlist.css`. 
+You can use this for the admin site or if you don't want to use Bootstrap.
 
 ### Toggle button
 
@@ -58,13 +66,16 @@ The template tag takes the following arguments:
 
 ### ListViews and the `on_watchlist` QuerySet annotation
 
-Note that if a value for the `on_watchlist` argument is not provided to the toggle button tag (i.e. the value is `None`),
-the tag will make a query to check if the item is on the watchlist. This is acceptable if you are only rendering
-one toggle button per page. But if you are rendering multiple toggle buttons (for example one for each
-item in a list view), then this will create a query and a database hit for each button, slowing down the page.
+Note that if a value for the `on_watchlist` argument is not provided to the toggle 
+button tag (i.e. the value is `None`), the tag will make a query to check if the 
+item is on the watchlist. This is acceptable if you are only rendering one toggle 
+button per page. But if you are rendering multiple toggle buttons per page, for 
+example one for each item in a list view, then this will create a query and a 
+database hit for each button, slowing down the page.
 
-To easily provide a `on_watchlist` value for each object in a queryset in a single query, call the 
-`annotate_queryset` method on a watchlist manager with the queryset. For example:
+To easily provide a `on_watchlist` value for each object in a queryset in a single 
+query, call the `annotate_queryset` method on a watchlist manager with the queryset.
+For example:
 ```python
 from mizdb_watchlist.manager import get_manager
 
@@ -77,7 +88,8 @@ class MyListView(ListView):
         return queryset
 ```
 
-This adds a `on_watchlist` annotation to each object in the queryset. You can then use the annotation like this:
+This adds a `on_watchlist` annotation to each object in the queryset. 
+You can then use the annotation as an argument for the tag like this:
 ```html
 {% for object in object_list %}
   ...
@@ -148,9 +160,9 @@ The tag takes two arguments:
 ## Admin integration
 
 This library comes with a ModelAdmin for the Watchlist model. 
-The ModelAdmin also provides an admin view for the watchlist overview and adds it 
-to the ModelAdmin's URLs with the view name `watchlist`. The URL of the overview can 
-be reversed with `reverse(f"{your_admin_site.name}:watchlist")`.
+The ModelAdmin provides an admin view for the watchlist overview and adds it 
+to the ModelAdmin's URLs with the view name `watchlist`. The URL of the overview 
+can be reversed with `reverse(f"{your_admin_site.name}:watchlist")`.
 
 The ModelAdmin itself lets admins inspect and modify the (model) watchlists of 
 other users, while the overview displays the watchlist items of the current admin user.
