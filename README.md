@@ -97,6 +97,7 @@ You can then use the annotation as an argument for the tag like this:
 {% endfor %}
 ```
 
+### ListViewMixin
 You can also use the `ListViewMixin` to add annotations to your ListViews:
 ```python
 from mizdb_watchlist.views import ListViewMixin
@@ -104,6 +105,10 @@ from mizdb_watchlist.views import ListViewMixin
 class MyListView(ListViewMixin, ListView):
     pass
 ```
+
+Additionally, if the right GET query parameter is present, `ListViewMixin` filters 
+the queryset to only include items on the watchlist. 
+This is utilized by the changelist links on the watchlist overview.
 
 ### Displaying the watchlist
 
