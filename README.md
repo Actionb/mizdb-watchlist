@@ -59,9 +59,9 @@ The template tag takes the following arguments:
 |--------------|---------------|-------------------------------------------------------------------------------------------|
 | request      | **required**  | the view's request                                                                        |
 | obj          | **required**  | the model object to add or remove                                                         |
-| text         | ""            | optional text for the button                                                              |
-| url          | None          | the URL for the view that handles the toggling. Defaults to `reverse("watchlist:toggle")` |
-| on_watchlist | None          | an optional boolean that indicates whether the item is on the watchlist                   |
+| text         | `""`          | optional text for the button                                                              |
+| url          | `None`        | the URL for the view that handles the toggling. Defaults to `reverse("watchlist:toggle")` |
+| on_watchlist | `None`        | an optional boolean that indicates whether the item is on the watchlist                   |
 
 
 ### ListViews and the `on_watchlist` QuerySet annotation
@@ -74,7 +74,7 @@ example one for each item in a list view, then this will create a query and a
 database hit for each button, slowing down the page.
 
 To easily provide a `on_watchlist` value for each object in a queryset in a single 
-query, call the `annotate_queryset` method on a watchlist manager with the queryset.
+query, call the `annotate_queryset` method on a watchlist manager on the queryset.
 For example:
 ```python
 from mizdb_watchlist.manager import get_manager
@@ -98,7 +98,7 @@ You can then use the annotation as an argument for the tag like this:
 ```
 
 ### ListViewMixin
-You can also use the `ListViewMixin` to add annotations to your ListViews:
+To add the above annotations, you can add the `ListViewMixin` to your ListViews:
 ```python
 from mizdb_watchlist.views import ListViewMixin
 
@@ -108,7 +108,7 @@ class MyListView(ListViewMixin, ListView):
 
 Additionally, if the right GET query parameter is present, `ListViewMixin` filters 
 the queryset to only include items on the watchlist. 
-This is utilized by the changelist links on the watchlist overview.
+This is utilized, for example, by the changelist links on the watchlist overview.
 
 ### Displaying the watchlist
 
@@ -157,10 +157,10 @@ You can add this to your site navigation:
 ```
 The tag takes two arguments:
 
-| Argument   | Default value | Description                                                                         |
-|------------|---------------|-------------------------------------------------------------------------------------|
-| view_name  | **required**  | the view name of the watchlist as declared in the URL conf                          |
-| icon       | True          | an optional boolean indicating whether an icon should be included in the link HTML  |
+| Argument   | Default value  | Description                                                                         |
+|------------|----------------|-------------------------------------------------------------------------------------|
+| view_name  | **required**   | the view name of the watchlist as declared in the URL conf                          |
+| icon       | `True`         | an optional boolean indicating whether an icon should be included in the link HTML  |
 
 ## Admin integration
 
