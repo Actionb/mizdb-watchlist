@@ -263,7 +263,7 @@ class TestListViewMixin:
         assert person_not_on_watchlist in queryset
 
 
-class TestModelAdmin(ModelAdminMixin, admin.ModelAdmin):
+class PersonAdmin(ModelAdminMixin, admin.ModelAdmin):
     pass
 
 
@@ -271,7 +271,7 @@ class TestModelAdminMixin:
 
     @pytest.fixture
     def view(self, http_request, add_watchlist_annotations):
-        view = TestModelAdmin(Person, admin.site)
+        view = PersonAdmin(Person, admin.site)
         view.add_watchlist_annotations = add_watchlist_annotations
         return view
 
