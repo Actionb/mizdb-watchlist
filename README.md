@@ -27,9 +27,10 @@ multiple items, and a default template for rendering the watchlist.
 ### Toggle button
 
 The toggle button adds an item to your watchlist if it is not already on it, or
-removes it from the watchlist if the item is already on it.
+removes it from the watchlist if the item is already on it. 
+If the item is on the watchlist, the button is rendered with the `on-watchlist` CSS class.
 
-Use the `toggle_button` template tag to add a button to your page:
+The `toggle_button` template tag adds a button to your page:
 ```html
 {% load static mizdb_watchlist %}
 {% block extrahead %}
@@ -54,8 +55,8 @@ The template tag takes the following arguments:
 
 ### ListViews and the `on_watchlist` QuerySet annotation
 
-Note that if a value for the `on_watchlist` argument is not provided to the toggle button tag, the tag
-will make a query to check if the item is on the watchlist. This is acceptable if you are only rendering
+Note that if a value for the `on_watchlist` argument is not provided to the toggle button tag (i.e. the value is `None`),
+the tag will make a query to check if the item is on the watchlist. This is acceptable if you are only rendering
 one toggle button per page. But if you are rendering multiple toggle buttons (for example one for each
 item in a list view), then this will create a query and a database hit for each button, slowing down the page.
 
