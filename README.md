@@ -2,6 +2,9 @@
 
 Django model and views that implement a "watchlist" of other Django objects.
 
+For authenticated users, the watchlist items are stored in the Watchlist model. 
+For unauthenticated users, the watchlist is stored in a local Django session instead.
+
 ## Installation
 
 Install using pip:
