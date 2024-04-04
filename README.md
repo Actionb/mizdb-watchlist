@@ -221,7 +221,11 @@ To include the toggle button on admin change pages, you can override the
   <script src="{% static 'mizdb_watchlist/js/watchlist.js' %}"></script>
 {% endblock extrahead %}
 
-{% block content_subtitle %}{% if subtitle %}<h2>{{ subtitle }} {% toggle_button request original %}</h2>{% endif %}{% endblock %}
+{% block content_subtitle %}
+    {% if subtitle %}
+        <h2>{{ subtitle }} {% toggle_button request original %}</h2>
+    {% endif %}
+{% endblock %}
 ``` 
 
 To add a link to the watchlist overview to the admin user links, overwrite 
