@@ -95,8 +95,7 @@ example one for each item in a list view, then this will create a query and a
 database hit for each button, slowing down the page.
 
 To easily provide a `on_watchlist` value for each object in a queryset in a single 
-query, call the `annotate_queryset` method on a watchlist manager on the queryset.
-For example:
+query, call the watchlist manager method `annotate_queryset` on the queryset:
 ```python
 from mizdb_watchlist.manager import get_manager
 
