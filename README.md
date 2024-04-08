@@ -163,6 +163,19 @@ Render the HTML for the watchlist in your template, for example:
 {% endblock content %}
 ```
 
+The watchlist overview groups the watchlist items by model. Each watchlist item
+includes a link to the item's change page, and each group includes a link to the
+changelist for the group's model. The changelist URL includes a query parameter 
+to filter the changelist to only show the model objects that are currently on the
+watchlist (this requires [ListViewMixin](#listviewmixin) on the changelist view).
+
+The URLs for the links are reversed from URL names that follow the Django admin
+naming pattern ([see Reversing Admin URLs](https://docs.djangoproject.com/en/5.0/ref/contrib/admin/#reversing-admin-urls)),
+i.e. `{{app_label}}_{{model_name}}_change` and `{{app_label}}_{{model_name}}_changelist`.
+If you are using a different URL naming scheme, you can override the `get_object_url`
+and `get_changelist_url` provided by `WatchlistViewMixin`.
+
+
 #### Link to the watchlist
 
 The template tag `watchlist_link` renders a hyperlink to the watchlist overview.
