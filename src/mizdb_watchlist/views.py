@@ -7,7 +7,6 @@ from django.urls import NoReverseMatch, reverse
 from django.views.decorators.csrf import csrf_protect
 from django.views.generic.base import ContextMixin
 
-from mizdb_watchlist.actions import add_to_watchlist
 from mizdb_watchlist.manager import ANNOTATION_FIELD, get_manager
 
 ON_WATCHLIST_VAR = ANNOTATION_FIELD
@@ -99,7 +98,7 @@ def annotate_view_queryset(request, queryset):
 
 
 # Requires two mixins since ModelAdmin.get_queryset takes a `request`
-# parameter while ListView.get_queryset does not. Also, opted against adding a
+# parameter while ListView.get_queryset does not. I opted against adding a
 # "base" mixin to keep the inheritance shallow(er).
 
 
@@ -130,11 +129,8 @@ class ModelAdminMixin:
     (defaults to: 'on_watchlist') is present in the request GET parameters.
     Set ``add_watchlist_annotations`` to ``False`` to not add annotations and
     skip filtering.
-
-    Adds the ``add_to_watchlist`` action to the actions.
     """
 
-    actions = [add_to_watchlist]
     add_watchlist_annotations = True
 
     def get_queryset(self, request):

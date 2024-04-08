@@ -3,12 +3,14 @@ from django.contrib import admin
 from django.urls import include, path
 from playwright.sync_api import expect
 
+from mizdb_watchlist.actions import add_to_watchlist
 from mizdb_watchlist.admin import WatchlistAdmin
 from mizdb_watchlist.models import Watchlist
 from mizdb_watchlist.views import ON_WATCHLIST_VAR, ModelAdminMixin
 from tests.testapp.models import Person
 
 site = admin.AdminSite(name="admin")
+site.add_action(add_to_watchlist)
 
 
 @admin.register(Person, site=site)

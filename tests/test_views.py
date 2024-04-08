@@ -299,6 +299,3 @@ class TestModelAdminMixin:
         queryset = view.get_queryset(http_request)
         assert person_on_watchlist in queryset
         assert person_not_on_watchlist in queryset
-
-    def test_has_action(self, view, http_request):
-        assert "add_to_watchlist" in view.get_actions(http_request)

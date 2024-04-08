@@ -16,6 +16,7 @@ Django model and views that implement a "watchlist" of other Django objects.
     * [Admin integration](#admin-integration)
       * [Admin toggle button & watchlist link](#admin-toggle-button--watchlist-link)
       * [ModelAdminMixin](#modeladminmixin)
+      * [Admin action](#admin-action)
   * [Demo & Development](#demo--development)
     * [Tests](#tests)
     * [Linting & Formatting](#linting--formatting)
@@ -316,6 +317,31 @@ from mizdb_watchlist.views import ModelAdminMixin
 @admin.register(MyModel)
 class MyModelAdmin(ModelAdminMixin, admin.ModelAdmin):
     pass
+```
+
+#### Admin action
+
+You can use the `add_to_watchlist` action to add multiple items at once from the
+admin changelist. To make the action available in your application, either
+[add the action to your ModelAdmin](https://docs.djangoproject.com/en/5.0/ref/contrib/admin/actions/#adding-actions-to-the-modeladmin)
+or [add it to your admin site](https://docs.djangoproject.com/en/5.0/ref/contrib/admin/actions/#making-actions-available-site-wide)
+to make it globally available. For example:
+
+```python
+from mizdb_watchlist.actions import add_to_watchlist
+from mizdb_watchlist.views import ModelAdminMixin
+
+my_admin_site = admin.AdminSite(name="admin")
+
+
+# for a single ModelAdmin:
+@admin.register(MyModel, site=my_admin_site)
+class MyModelAdmin(ModelAdminMixin, admin.ModelAdmin):
+    actions = [add_to_watchlist, ...]
+
+
+# or for the entire admin site:
+my_admin_site.add_action(add_to_watchlist)
 ```
 
 ## Demo & Development
