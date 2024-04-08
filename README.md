@@ -40,12 +40,12 @@ NOTE: ensure that Django's SessionMiddleware is [enabled](https://docs.djangopro
 
 ## How to use
 
-This library provides a toggle button for adding individual items, as well as a 
-list action for adding multiple items, and a default template for rendering the 
+This library provides a toggle button for adding individual items, a list view 
+action for adding multiple items, and a default template for rendering the 
 overview over what's on the watchlist. 
 
 The watchlist items are stored in a Watchlist model for authenticated users. 
-For unauthenticated users, the watchlist is stored in a local Django session instead.
+For unauthenticated users, the watchlist is stored in a Django session instead.
 
 The `mizdb_watchlist/js/watchlist.js` javascript drives the toggle button and the
 buttons on the watchlist overview.
@@ -58,11 +58,11 @@ You can use this for the admin site or if you don't want to use Bootstrap.
 
 #### Toggle button
 
-The toggle button adds an item to your watchlist if it is not already on it, or
-removes it from the watchlist if the item is already on it. 
-If the item is on the watchlist, the button is rendered with the `on-watchlist` CSS class.
+The toggle button adds an item to your watchlist if it is not already on it, 
+otherwise it removes the item for the watchlist. If the item is on the watchlist, 
+the button is rendered with the `on-watchlist` CSS class.
 
-The `toggle_button` template tag adds a button to your page:
+Use the `toggle_button` template tag to a button to your page:
 ```html
 {% load static mizdb_watchlist %}
 {% block extrahead %}
@@ -94,7 +94,7 @@ button per page. But if you are rendering multiple toggle buttons per page, for
 example one for each item in a list view, then this will create a query and a 
 database hit for each button, slowing down the page.
 
-To easily provide a `on_watchlist` value for each object in a queryset in a single 
+To provide a `on_watchlist` value for each object in a queryset in a single 
 query, call the watchlist manager method `annotate_queryset` on the queryset:
 ```python
 from mizdb_watchlist.manager import get_manager
@@ -118,7 +118,13 @@ You can then use the annotation as an argument for the tag like this:
 ```
 
 #### ListViewMixin
-To add the above annotations, you can add the `ListViewMixin` to your ListViews:
+
+The `ListViewMixin` modifies a ListView's queryset to add the above annotations.
+Additionally, if the right GET query parameter is present, `ListViewMixin` filters 
+the queryset to only include items on the watchlist. 
+This is utilized, for example, by the changelist links on the watchlist overview.
+
+Add the `ListViewMixin` to your ListViews like this:
 ```python
 from mizdb_watchlist.views import ListViewMixin
 
@@ -126,9 +132,6 @@ class MyListView(ListViewMixin, ListView):
     pass
 ```
 
-Additionally, if the right GET query parameter is present, `ListViewMixin` filters 
-the queryset to only include items on the watchlist. 
-This is utilized, for example, by the changelist links on the watchlist overview.
 
 ### Displaying the watchlist
 
@@ -171,10 +174,20 @@ watchlist (this requires [ListViewMixin](#listviewmixin) on the changelist view)
 
 The URLs for the links are reversed from URL names that follow the Django admin
 naming pattern ([see Reversing Admin URLs](https://docs.djangoproject.com/en/5.0/ref/contrib/admin/#reversing-admin-urls)),
-i.e. `{{app_label}}_{{model_name}}_change` and `{{app_label}}_{{model_name}}_changelist`.
+i.e. `{{app_label}}_{{model_name}}_changelist`.
 If you are using a different URL naming scheme, you can override the `get_object_url`
-and `get_changelist_url` provided by `WatchlistViewMixin`.
+and `get_changelist_url` provided by `WatchlistViewMixin`. For example:
+```python
 
+class MyListView(ListViewMixin, ListView):
+    
+    def get_object_url(self, request, model, pk):
+      return reverse(
+        f"{model._meta.model_name}_detail", 
+        args=[pk], 
+        current_app=request.resolver_match.namespace
+      )
+```
 
 #### Link to the watchlist
 
