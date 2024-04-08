@@ -252,17 +252,14 @@ The ModelAdmin adds the `add_to_watchlist` action that lets you select items on
 the changelist page and add them to your watchlist via admin actions.
 
 The ModelAdmin is hooked up to Django's default admin site.
-If you are not using the default admin site, make sure to register the ModelAdmin with your site:
+If you are not using the default admin site, make sure to register the ModelAdmin
+with your site:
 
 ```python
-from django.contrib import admin
 from mizdb_watchlist.admin import WatchlistAdmin
 from mizdb_watchlist.models import Watchlist
 
-
-@admin.register(Watchlist, site=my_admin_site)
-class MyWatchlistAdmin(WatchlistAdmin):
-    pass
+my_admin_site.register(Watchlist, WatchlistAdmin)
 ```
 
 #### Admin toggle button & watchlist link
