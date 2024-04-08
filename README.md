@@ -36,8 +36,14 @@ Then add to your `INSTALLED_APPS` settings:
 ```python
 INSTALLED_APPS = [
     ...,
-    "mizdb_watchlist"
+    "mizdb_watchlist",
 ]
+```
+
+Finally, run the migration to add the Watchlist model:
+
+```commandline
+python manage.py migrate mizdb_watchlist
 ```
 
 NOTE: ensure that Django's SessionMiddleware is [enabled](https://docs.djangoproject.com/en/5.0/topics/http/sessions/).
