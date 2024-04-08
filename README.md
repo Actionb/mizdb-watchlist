@@ -63,7 +63,7 @@ You can use this for the admin site or if you don't want to use Bootstrap.
 #### Toggle button
 
 The toggle button adds an item to your watchlist if it is not already on it,
-otherwise it removes the item for the watchlist. If the item is on the watchlist,
+otherwise it removes the item from the watchlist. If the item is on the watchlist,
 the button is rendered with the `on-watchlist` CSS class.
 
 Use the `toggle_button` template tag to a button to your page:
@@ -191,9 +191,9 @@ changelist for the group's model. The changelist URL includes a query parameter
 to filter the changelist to only show the model objects that are currently on the
 watchlist (this requires [ListViewMixin](#listviewmixin) on the changelist view).
 
-By default, the URLs for the links are reversed from URL names that follow the
-Django admin naming
-pattern ([see Reversing Admin URLs](https://docs.djangoproject.com/en/5.0/ref/contrib/admin/#reversing-admin-urls)),
+By default, the URLs for the links are reversed with URL names that follow the
+Django admin URL naming
+scheme ([see Reversing Admin URLs](https://docs.djangoproject.com/en/5.0/ref/contrib/admin/#reversing-admin-urls)),
 i.e. `{{app_label}}_{{model_name}}_changelist`.
 If you are using a different URL naming scheme, you can override the `get_object_url`
 and `get_changelist_url` provided by `WatchlistViewMixin`. For example:
