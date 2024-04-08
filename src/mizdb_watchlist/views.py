@@ -20,17 +20,6 @@ def _get_model_object(model_label, pk):
 class WatchlistViewMixin(ContextMixin):
     """A view mixin that adds template context items for displaying the watchlist."""
 
-    def get_object_url(self, request, model, pk):
-        """
-        Return the URL to the change page of the object described by the given
-        model and primary key.
-        """
-        opts = model._meta
-        viewname = f"{opts.app_label}_{opts.model_name}_change"
-        if app_name := request.resolver_match.app_name:
-            viewname = f"{app_name}:{viewname}"
-        return reverse(viewname, args=[pk], current_app=request.resolver_match.namespace)
-
     def get_watchlist(self, request, prune=True):
         """Return the watchlist in dictionary form for the given request."""
         manager = get_manager(request)
@@ -59,28 +48,40 @@ class WatchlistViewMixin(ContextMixin):
                 model_items.append(watchlist_item)
 
             if model_items:
-                changelist_url = f"{self.get_changelist_url(request, model)}?{ON_WATCHLIST_VAR}=True"
+                if changelist_url := self.get_changelist_url(request, model):
+                    changelist_url = f"{self.get_changelist_url(request, model)}?{ON_WATCHLIST_VAR}=True"
                 data = {"model_items": model_items, "changelist_url": changelist_url, "model_label": model_label}
                 watchlist[model._meta.verbose_name.capitalize()] = data
         context["watchlist"] = OrderedDict(sorted(watchlist.items()))
         return context
 
+    def _get_url_for_watchlist_link(self, request, viewname, args=None, kwargs=None):
+        if app_name := request.resolver_match.app_name:
+            viewname = f"{app_name}:{viewname}"
+        try:
+            return reverse(viewname, args=args, kwargs=kwargs, current_app=request.resolver_match.namespace)
+        except NoReverseMatch:
+            # Fail silently if the name cannot be reversed. The template will
+            # then simply not render any links.
+            return ""
+
+    def get_object_url(self, request, model, pk):
+        """
+        Return the URL to the change page of the object described by the given
+        model and primary key.
+        """
+        viewname = f"{model._meta.app_label}_{model._meta.model_name}_change"
+        return self._get_url_for_watchlist_link(request, viewname, args=[pk])
+
+    def get_changelist_url(self, request, model):
+        """Return the URL to the changelist of the given model."""
+        viewname = f"{model._meta.app_label}_{model._meta.model_name}_changelist"
+        return self._get_url_for_watchlist_link(request, viewname)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context.update(self.get_watchlist_context(self.request))  # noqa
         return context
-
-    def get_changelist_url(self, request, model):
-        """
-        Return the URL to the changelist of the given model.
-
-        Append a query parameter to filter the changelist queryset to only
-        include watchlist items.
-        """
-        viewname = f"{model._meta.app_label}_{model._meta.model_name}_changelist"
-        if app_name := request.resolver_match.app_name:
-            viewname = f"{app_name}:{viewname}"
-        return reverse(viewname, current_app=request.resolver_match.namespace)
 
 
 def annotate_view_queryset(request, queryset):
