@@ -289,9 +289,9 @@ make reformat
 ```
 to fix the issues.
 
-### Demo:
+### Demo
 
-To start the demo server:
+To start the demo server, do:
 
 ```commandline
 make init-demo
