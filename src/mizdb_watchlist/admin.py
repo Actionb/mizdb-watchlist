@@ -1,4 +1,3 @@
-from django import forms
 from django.contrib import admin
 from django.template.response import TemplateResponse
 from django.urls import path
@@ -12,12 +11,6 @@ from mizdb_watchlist.views import WatchlistViewMixin
 class WatchlistAdmin(WatchlistViewMixin, admin.ModelAdmin):
     list_display = ["object_repr", "object_id", "user", "content_type", "time_added"]
     list_filter = ["user__username", "content_type"]
-
-    @property
-    def media(self):
-        media = super().media
-        media += forms.Media(js=["mizdb_watchlist/js/watchlist.js"], css={"all": ["mizdb_watchlist/css/watchlist.css"]})
-        return media
 
     def get_urls(self):
         urls = super().get_urls()

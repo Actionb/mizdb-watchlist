@@ -45,11 +45,6 @@ def watchlist_response(http_request, model_admin):
 @pytest.mark.usefixtures("mock_each_context", "mock_get_watchlist_context")
 class TestWatchlistAdmin:
 
-    def test_media_contains_required_files(self, model_admin):
-        media = model_admin.media
-        assert "mizdb_watchlist/js/watchlist.js" in media._js
-        assert "mizdb_watchlist/css/watchlist.css" in media._css["all"]
-
     def test_get_urls_includes_watchlist_url(self, model_admin):
         pattern = model_admin.get_urls()[0]
         assert pattern.name == "watchlist"
@@ -60,9 +55,6 @@ class TestWatchlistAdmin:
 
     def test_watchlist_context(self, watchlist_response):
         context = watchlist_response.context_data
-        media = context["media"]
-        assert "mizdb_watchlist/js/watchlist.js" in media._js
-        assert "mizdb_watchlist/css/watchlist.css" in media._css["all"]
         assert context["title"] == "My watchlist"
 
     def test_watchlist_calls_get_watchlist_context(self, mock_get_watchlist_context, watchlist_response):
