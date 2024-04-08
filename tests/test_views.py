@@ -227,7 +227,7 @@ def add_watchlist_annotations():
     return True
 
 
-class TestListView(ListViewMixin, ListView):
+class DummyListView(ListViewMixin, ListView):
     queryset = Person.objects.all()
 
 
@@ -235,7 +235,7 @@ class TestListViewMixin:
 
     @pytest.fixture
     def view(self, http_request, add_watchlist_annotations):
-        view = TestListView()
+        view = DummyListView()
         view.request = http_request
         view.add_watchlist_annotations = add_watchlist_annotations
         return view
