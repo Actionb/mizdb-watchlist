@@ -60,7 +60,7 @@ class WatchlistViewMixin(ContextMixin):
                 model_items.append(watchlist_item)
 
             if model_items:
-                changelist_url = self.get_changelist_url(request, model)
+                changelist_url = f"{self.get_changelist_url(request, model)}?{ON_WATCHLIST_VAR}=True"
                 data = {"model_items": model_items, "changelist_url": changelist_url, "model_label": model_label}
                 watchlist[model._meta.verbose_name.capitalize()] = data
         context["watchlist"] = OrderedDict(sorted(watchlist.items()))
@@ -81,8 +81,7 @@ class WatchlistViewMixin(ContextMixin):
         viewname = f"{model._meta.app_label}_{model._meta.model_name}_changelist"
         if app_name := request.resolver_match.app_name:
             viewname = f"{app_name}:{viewname}"
-        url = reverse(viewname, current_app=request.resolver_match.namespace)
-        return f"{url}?{ON_WATCHLIST_VAR}=True"
+        return reverse(viewname, current_app=request.resolver_match.namespace)
 
 
 def annotate_view_queryset(request, queryset):
