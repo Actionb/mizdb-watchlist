@@ -4,14 +4,13 @@ import pytest
 from django.contrib import admin
 from django.urls import include, path, reverse
 
-from mizdb_watchlist.admin import WatchlistAdmin
+from mizdb_watchlist.admin import WatchlistAdmin, WatchlistMixin
 from mizdb_watchlist.models import Watchlist
+from tests.testapp.models import Person
 
 site = admin.AdminSite(name="test_admin")
 
-
 admin.register(Watchlist, site=site)(WatchlistAdmin)
-
 
 urlpatterns = [path("", site.urls), path("watchlist", include("mizdb_watchlist.urls"))]
 
@@ -62,3 +61,43 @@ class TestWatchlistAdmin:
 
     def test_watchlist_calls_each_context(self, mock_each_context, watchlist_response):
         mock_each_context.assert_called()
+
+
+@pytest.fixture
+def add_watchlist_annotations():
+    return True
+
+
+class PersonAdmin(WatchlistMixin, admin.ModelAdmin):
+    pass
+
+
+class TestModelAdminMixin:
+
+    @pytest.fixture
+    def view(self, http_request, add_watchlist_annotations):
+        view = PersonAdmin(Person, admin.site)
+        view.add_watchlist_annotations = add_watchlist_annotations
+        return view
+
+    def test_get_queryset_add_annotations(self, view, http_request):
+        assert "on_watchlist" in view.get_queryset(http_request).query.annotations
+
+    @pytest.mark.parametrize("add_watchlist_annotations", [False])
+    def test_get_queryset_not_add_annotations(self, view, http_request, add_watchlist_annotations):
+        assert "on_watchlist" not in view.get_queryset(http_request).query.annotations
+
+    @pytest.mark.parametrize("request_data", [{"on_watchlist": True}])
+    def test_get_queryset_filtered(self, view, http_request, fill_watchlist, person_factory, request_data):
+        person_on_watchlist = fill_watchlist[0]
+        person_not_on_watchlist = person_factory()
+        queryset = view.get_queryset(http_request)
+        assert person_on_watchlist in queryset
+        assert person_not_on_watchlist not in queryset
+
+    def test_get_queryset_not_filtered(self, view, http_request, fill_watchlist, person_factory):
+        person_on_watchlist = fill_watchlist[0]
+        person_not_on_watchlist = person_factory()
+        queryset = view.get_queryset(http_request)
+        assert person_on_watchlist in queryset
+        assert person_not_on_watchlist in queryset

@@ -8,7 +8,7 @@ from django.urls import include, path, reverse
 from playwright.sync_api import expect
 
 from mizdb_watchlist.manager import get_manager
-from mizdb_watchlist.views import ListViewMixin, WatchlistViewMixin
+from mizdb_watchlist.views import WatchlistMixin, WatchlistViewMixin
 from tests.factories import PersonFactory
 from tests.testapp.models import Person
 
@@ -17,7 +17,7 @@ def dummy_view(*_args):
     return HttpResponse("This is a dummy view for tests")
 
 
-class Changelist(ListViewMixin, views.generic.ListView):
+class Changelist(WatchlistMixin, views.generic.ListView):
     queryset = Person.objects.all()
     template_name = "changelist.html"
 

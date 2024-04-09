@@ -98,19 +98,19 @@ def annotate_view_queryset(request, queryset):
     return queryset
 
 
-# Requires two mixins since ModelAdmin.get_queryset takes a `request`
-# parameter while ListView.get_queryset does not. I opted against adding a
-# "base" mixin to keep the inheritance shallow(er).
-
-
-class ListViewMixin:
+class WatchlistMixin:
     """
-    Add this mixin to your list views for models that use the watchlist.
+    A mixin that adds annotations and filtering specific to the watchlist to
+    the view's queryset.
 
-    Adds annotations to the queryset and applies a filter if ``ON_WATCHLIST_VAR``
-    (defaults to: 'on_watchlist') is present in the request GET parameters.
-    Set ``add_watchlist_annotations`` to ``False`` to not add annotations and
-    skip filtering.
+    If ``ON_WATCHLIST_VAR`` (defaults to: ``on_watchlist``) is present in the
+    request GET parameters, the queryset will be filtered to only include
+    objects that are currently on the user's watchlist.
+
+    Set ``add_watchlist_annotations`` to ``False`` to skip adding annotations
+    and disable filtering.
+
+    Add this mixin to your list views for models that use the watchlist.
     """
 
     add_watchlist_annotations = True
@@ -119,25 +119,6 @@ class ListViewMixin:
         queryset = super().get_queryset()  # noqa
         if self.add_watchlist_annotations:
             queryset = annotate_view_queryset(self.request, queryset)  # noqa
-        return queryset
-
-
-class ModelAdminMixin:
-    """
-    Add this mixin to your model admins for models that use the watchlist.
-
-    Adds annotations to the queryset and applies a filter if ``ON_WATCHLIST_VAR``
-    (defaults to: 'on_watchlist') is present in the request GET parameters.
-    Set ``add_watchlist_annotations`` to ``False`` to not add annotations and
-    skip filtering.
-    """
-
-    add_watchlist_annotations = True
-
-    def get_queryset(self, request):
-        queryset = super().get_queryset(request)  # noqa
-        if self.add_watchlist_annotations:
-            queryset = annotate_view_queryset(request, queryset)
         return queryset
 
 

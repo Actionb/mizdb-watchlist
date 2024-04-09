@@ -1,16 +1,16 @@
 from django import forms, views
 
-from mizdb_watchlist.views import ListViewMixin, WatchlistViewMixin
+from mizdb_watchlist.views import WatchlistMixin, WatchlistViewMixin
 
 from .models import Company, Person
 
 
-class PersonListView(ListViewMixin, views.generic.ListView):
+class PersonListView(WatchlistMixin, views.generic.ListView):
     queryset = Person.objects.all()
     template_name = "changelist.html"
 
 
-class CompanyListView(ListViewMixin, views.generic.ListView):
+class CompanyListView(WatchlistMixin, views.generic.ListView):
     queryset = Company.objects.all()
     template_name = "changelist.html"
 

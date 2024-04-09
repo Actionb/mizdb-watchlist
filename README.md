@@ -20,12 +20,12 @@ You can use this for the admin site or if you don't want to use Bootstrap.
   * [Manipulating the watchlist](#manipulating-the-watchlist)
     * [Toggle button](#toggle-button)
     * [ListViews and the `on_watchlist` QuerySet annotation](#listviews-and-the-on_watchlist-queryset-annotation)
-    * [ListViewMixin](#listviewmixin)
+    * [views.WatchlistMixin](#viewswatchlistmixin)
   * [Displaying the watchlist](#displaying-the-watchlist)
     * [Link to the watchlist](#link-to-the-watchlist)
   * [Admin integration](#admin-integration)
     * [Admin toggle button & watchlist link](#admin-toggle-button--watchlist-link)
-    * [ModelAdminMixin](#modeladminmixin)
+    * [admin.WatchlistMixin](#adminwatchlistmixin)
     * [Admin action](#admin-action)
   * [Demo & Development](#demo--development)
     * [Tests](#tests)
@@ -144,20 +144,20 @@ You can then use the annotation as an argument for the tag like this:
 ```
 [comment]: <> (@formatter:on)
 
-### ListViewMixin
+### views.WatchlistMixin
 
-The `ListViewMixin` modifies a ListView's queryset to add the above annotations.
-Additionally, if the right GET query parameter is present, `ListViewMixin` filters
+The `WatchlistMixin` modifies a ListView's queryset to add the above annotations.
+Additionally, if the right GET query parameter is present, `WatchlistMixin` filters
 the queryset to only include items on the watchlist.
 This is utilized, for example, by the changelist links on the watchlist overview.
 
-Add the `ListViewMixin` to your ListViews like this:
+Add the `WatchlistMixin` to your ListViews like this:
 
 ```python
-from mizdb_watchlist.views import ListViewMixin
+from mizdb_watchlist.views import WatchlistMixin
 
 
-class MyListView(ListViewMixin, ListView):
+class MyListView(WatchlistMixin, ListView):
     pass
 ```
 
@@ -204,7 +204,8 @@ The watchlist overview groups the watchlist items by model. Each watchlist item
 includes a link to the item's change page, and each group includes a link to the
 changelist for the group's model. The changelist URL includes a query parameter
 to filter the changelist to only show the model objects that are currently on the
-watchlist (this requires [ListViewMixin](#listviewmixin) on the changelist view).
+watchlist (this requires [WatchlistMixin](#viewswatchlistmixin) on the changelist
+view).
 
 By default, the URLs for the links are reversed with URL names that follow the
 Django admin URL naming
@@ -214,7 +215,7 @@ If you are using a different URL naming scheme, you can override the `get_object
 and `get_changelist_url` methods provided by `WatchlistViewMixin`. For example:
 
 ```python
-class MyListView(ListViewMixin, ListView):
+class MyListView(WatchlistMixin, ListView):
 
     def get_object_url(self, request, model, pk):
         return reverse(
@@ -315,18 +316,18 @@ To add a link to the watchlist overview to the admin user links, overwrite
 > See [Overriding admin templates](https://docs.djangoproject.com/en/5.0/ref/contrib/admin/#admin-overriding-templates)
 > for more details on how to override admin templates.
 
-### ModelAdminMixin
+### admin.WatchlistMixin
 
-The `ModelAdminMixin` is the admin version of the `ListViewMixin`. The mixin adds
-annotations and filtering (see [ListViewMixin](#listviewmixin)) to the ModelAdmin's
-queryset.
+`admin.WatchlistMixin` is the admin version of `views.WatchlistMixin`. The mixin
+adds annotations and filtering (see [WatchlistMixin](#viewswatchlistmixin)) to
+the ModelAdmin's queryset.
 
 ```python
-from mizdb_watchlist.views import ModelAdminMixin
+from mizdb_watchlist.admin import WatchlistMixin
 
 
 @admin.register(MyModel)
-class MyModelAdmin(ModelAdminMixin, admin.ModelAdmin):
+class MyModelAdmin(WatchlistMixin, admin.ModelAdmin):
     pass
 ```
 
@@ -340,14 +341,14 @@ to make it globally available. For example:
 
 ```python
 from mizdb_watchlist.actions import add_to_watchlist
-from mizdb_watchlist.views import ModelAdminMixin
+from mizdb_watchlist.admin import WatchlistMixin
 
 my_admin_site = admin.AdminSite(name="admin")
 
 
 # for a single ModelAdmin:
 @admin.register(MyModel, site=my_admin_site)
-class MyModelAdmin(ModelAdminMixin, admin.ModelAdmin):
+class MyModelAdmin(WatchlistMixin, admin.ModelAdmin):
     actions = [add_to_watchlist, ...]
 
 
