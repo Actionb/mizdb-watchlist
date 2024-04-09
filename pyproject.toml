@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "mizdb-watchlist"
-version = "0.1.0"
+version = "0.1.6"
 description = "A watchlist for Django model objects."
 authors = [
   "Philip Becker <yummytea1@gmail.com>" ,
