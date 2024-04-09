@@ -1,22 +1,32 @@
 # mizdb-watchlist
 
-Django model and views that implement a "watchlist" of other Django objects.
+Django model and views that implement a watchlist of other Django objects.
+
+This library provides a toggle button for adding individual items, a list view
+action for adding multiple items, and a default template for rendering the
+overview of what's on the watchlist.
+
+The watchlist items are stored in a Watchlist model for authenticated users.
+For unauthenticated users, the watchlist is stored in a Django session instead.
+
+The styling was written with [Bootstrap](https://getbootstrap.com/) in mind.
+Alternatively, some rudimentary styling is provided with `mizdb_watchlist/css/watchlist.css`.
+You can use this for the admin site or if you don't want to use Bootstrap.
 
 [comment]: <> (@formatter:off)
 <!-- TOC -->
 * [mizdb-watchlist](#mizdb-watchlist)
   * [Installation](#installation)
-  * [How to use](#how-to-use)
-    * [Manipulating the watchlist](#manipulating-the-watchlist)
-      * [Toggle button](#toggle-button)
-      * [ListViews and the `on_watchlist` QuerySet annotation](#listviews-and-the-on_watchlist-queryset-annotation)
-      * [ListViewMixin](#listviewmixin)
-    * [Displaying the watchlist](#displaying-the-watchlist)
-      * [Link to the watchlist](#link-to-the-watchlist)
-    * [Admin integration](#admin-integration)
-      * [Admin toggle button & watchlist link](#admin-toggle-button--watchlist-link)
-      * [ModelAdminMixin](#modeladminmixin)
-      * [Admin action](#admin-action)
+  * [Manipulating the watchlist](#manipulating-the-watchlist)
+    * [Toggle button](#toggle-button)
+    * [ListViews and the `on_watchlist` QuerySet annotation](#listviews-and-the-on_watchlist-queryset-annotation)
+    * [ListViewMixin](#listviewmixin)
+  * [Displaying the watchlist](#displaying-the-watchlist)
+    * [Link to the watchlist](#link-to-the-watchlist)
+  * [Admin integration](#admin-integration)
+    * [Admin toggle button & watchlist link](#admin-toggle-button--watchlist-link)
+    * [ModelAdminMixin](#modeladminmixin)
+    * [Admin action](#admin-action)
   * [Demo & Development](#demo--development)
     * [Tests](#tests)
     * [Linting & Formatting](#linting--formatting)
@@ -41,6 +51,15 @@ INSTALLED_APPS = [
 ]
 ```
 
+Include the watchlist URLs in your URL conf:
+
+```python
+urlpatterns = [
+    ...,
+    path("mizdb_watchlist/", include("mizdb_watchlist.urls")),
+]
+```
+
 Finally, run the migration to add the Watchlist model:
 
 ```commandline
@@ -49,25 +68,9 @@ python manage.py migrate mizdb_watchlist
 
 NOTE: ensure that Django's SessionMiddleware is [enabled](https://docs.djangoproject.com/en/5.0/topics/http/sessions/).
 
-## How to use
+## Manipulating the watchlist
 
-This library provides a toggle button for adding individual items, a list view
-action for adding multiple items, and a default template for rendering the
-overview over what's on the watchlist.
-
-The watchlist items are stored in a Watchlist model for authenticated users.
-For unauthenticated users, the watchlist is stored in a Django session instead.
-
-The `mizdb_watchlist/js/watchlist.js` javascript drives the toggle button and the
-buttons on the watchlist overview.
-
-The styling was written with Bootstrap in mind. Alternatively, some rudimentary
-styling is provided with `mizdb_watchlist/css/watchlist.css`.
-You can use this for the admin site or if you don't want to use Bootstrap.
-
-### Manipulating the watchlist
-
-#### Toggle button
+### Toggle button
 
 The toggle button adds an item to your watchlist if it is not already on it,
 otherwise it removes the item from the watchlist. If the item is on the watchlist,
@@ -89,6 +92,11 @@ Use the `toggle_button` template tag to a button to your page:
 ```
 [comment]: <> (@formatter:on)
 
+> ℹ️ **NOTE**:
+> The `mizdb_watchlist/js/watchlist.js` javascript drives the toggle button and the
+> buttons that remove items on the watchlist overview. Make sure you include it.
+
+
 The template tag takes the following arguments:
 
 | Argument     | Default value | Description                                                                               |
@@ -99,7 +107,7 @@ The template tag takes the following arguments:
 | url          | `None`        | the URL for the view that handles the toggling. Defaults to `reverse("watchlist:toggle")` |
 | on_watchlist | `None`        | an optional boolean that indicates whether the item is on the watchlist                   |
 
-#### ListViews and the `on_watchlist` QuerySet annotation
+### ListViews and the `on_watchlist` QuerySet annotation
 
 Note that if a value for the `on_watchlist` argument is not provided to the toggle
 button tag (i.e. the value is `None`), the tag will make a query to check if the
@@ -136,7 +144,7 @@ You can then use the annotation as an argument for the tag like this:
 ```
 [comment]: <> (@formatter:on)
 
-#### ListViewMixin
+### ListViewMixin
 
 The `ListViewMixin` modifies a ListView's queryset to add the above annotations.
 Additionally, if the right GET query parameter is present, `ListViewMixin` filters
@@ -153,7 +161,7 @@ class MyListView(ListViewMixin, ListView):
     pass
 ```
 
-### Displaying the watchlist
+## Displaying the watchlist
 
 Add `WatchlistViewMixin` to a template view:
 
@@ -203,7 +211,7 @@ Django admin URL naming
 scheme ([see Reversing Admin URLs](https://docs.djangoproject.com/en/5.0/ref/contrib/admin/#reversing-admin-urls)),
 i.e. `{{app_label}}_{{model_name}}_changelist`.
 If you are using a different URL naming scheme, you can override the `get_object_url`
-and `get_changelist_url` provided by `WatchlistViewMixin`. For example:
+and `get_changelist_url` methods provided by `WatchlistViewMixin`. For example:
 
 ```python
 class MyListView(ListViewMixin, ListView):
@@ -216,13 +224,15 @@ class MyListView(ListViewMixin, ListView):
         )
 ```
 
-#### Link to the watchlist
+### Link to the watchlist
 
 The template tag `watchlist_link` renders a hyperlink to the watchlist overview.
 You can add this to your site navigation:
 
 [comment]: <> (@formatter:off)
 ```html
+{% load mizdb_watchlist %}
+
 <nav>
   <ul>
     ...
@@ -239,7 +249,7 @@ The tag takes two arguments:
 | view_name | **required**  | the view name of the watchlist as declared in the URL conf                         |
 | icon      | `True`        | an optional boolean indicating whether an icon should be included in the link HTML |
 
-### Admin integration
+## Admin integration
 
 This library comes with a ModelAdmin for the Watchlist model.
 The ModelAdmin provides an admin view for the watchlist overview and adds it
@@ -263,7 +273,7 @@ from mizdb_watchlist.models import Watchlist
 my_admin_site.register(Watchlist, WatchlistAdmin)
 ```
 
-#### Admin toggle button & watchlist link
+### Admin toggle button & watchlist link
 
 To include the toggle button on admin change pages, you can override the
 `admin/change_form.html` template. For example like this:
@@ -301,10 +311,11 @@ To add a link to the watchlist overview to the admin user links, overwrite
 ```
 [comment]: <> (@formatter:on)
 
-See [Overriding admin templates](https://docs.djangoproject.com/en/5.0/ref/contrib/admin/#admin-overriding-templates)
-for more details on how to override admin templates.
+> ℹ️
+> See [Overriding admin templates](https://docs.djangoproject.com/en/5.0/ref/contrib/admin/#admin-overriding-templates)
+> for more details on how to override admin templates.
 
-#### ModelAdminMixin
+### ModelAdminMixin
 
 The `ModelAdminMixin` is the admin version of the `ListViewMixin`. The mixin adds
 annotations and filtering (see [ListViewMixin](#listviewmixin)) to the ModelAdmin's
@@ -319,7 +330,7 @@ class MyModelAdmin(ModelAdminMixin, admin.ModelAdmin):
     pass
 ```
 
-#### Admin action
+### Admin action
 
 You can use the `add_to_watchlist` action to add multiple items at once from the
 admin changelist. To make the action available in your application, either
