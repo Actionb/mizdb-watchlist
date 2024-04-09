@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "mizdb-watchlist"
-version = "0.1.6"
+version = "0.1.7"
 description = "A watchlist for Django model objects."
 authors = [
   "Philip Becker <yummytea1@gmail.com>" ,
@@ -16,7 +16,7 @@ classifiers = [
     "Programming Language :: Python :: 3",
 ]
 license = "MIT"
-repository = "https://github.com/Actionb/mizdb-tomselect"
+repository = "https://github.com/Actionb/mizdb-watchlist"
 
 [tool.poetry.dependencies]
 python = "^3.9"

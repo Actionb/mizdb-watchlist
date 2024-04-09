@@ -1,6 +1,6 @@
 # Changelog
 
-## [unreleased]
+## 0.1.7 (2024-04-09)
 
 - fix repository URL in pyproject.toml
 
