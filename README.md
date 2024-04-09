@@ -66,7 +66,9 @@ Finally, run the migration to add the Watchlist model:
 python manage.py migrate mizdb_watchlist
 ```
 
-NOTE: ensure that Django's SessionMiddleware is [enabled](https://docs.djangoproject.com/en/5.0/topics/http/sessions/).
+> ⚠️️ **Note**:
+>
+> Django's SessionMiddleware must be [enabled](https://docs.djangoproject.com/en/5.0/topics/http/sessions/).
 
 ## Manipulating the watchlist
 
@@ -92,10 +94,10 @@ Use the `toggle_button` template tag to a button to your page:
 ```
 [comment]: <> (@formatter:on)
 
-> ℹ️ **NOTE**:
+> ℹ️ **Note**:
+>
 > The `mizdb_watchlist/js/watchlist.js` javascript drives the toggle button and the
 > buttons that remove items on the watchlist overview. Make sure you include it.
-
 
 The template tag takes the following arguments:
 
@@ -260,9 +262,6 @@ can be reversed with `reverse(f"{your_admin_site.name}:watchlist")`.
 The ModelAdmin itself lets admins inspect and modify the (model) watchlists of
 other users, while the overview displays the watchlist items of the current admin user.
 
-The ModelAdmin adds the `add_to_watchlist` action that lets you select items on
-the changelist page and add them to your watchlist via admin actions.
-
 The ModelAdmin is hooked up to Django's default admin site.
 If you are not using the default admin site, make sure to register the ModelAdmin
 with your site:
@@ -312,7 +311,8 @@ To add a link to the watchlist overview to the admin user links, overwrite
 ```
 [comment]: <> (@formatter:on)
 
-> ℹ️
+> ℹ️ **Note**:
+>
 > See [Overriding admin templates](https://docs.djangoproject.com/en/5.0/ref/contrib/admin/#admin-overriding-templates)
 > for more details on how to override admin templates.
 
