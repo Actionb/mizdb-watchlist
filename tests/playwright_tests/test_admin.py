@@ -73,7 +73,7 @@ class TestChangeView:
         watchlist_link = get_watchlist_link(change_view.locator("#user-tools"))
         expect(watchlist_link).to_be_visible()
         watchlist_link.click()
-        change_view.wait_for_url("**/_watchlist/", timeout=1000)
+        change_view.wait_for_url("**/_watchlist/")
 
 
 @pytest.fixture

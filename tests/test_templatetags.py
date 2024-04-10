@@ -1,6 +1,7 @@
 from unittest.mock import Mock, patch
 
 import pytest
+from django.urls import NoReverseMatch
 
 from mizdb_watchlist.templatetags.mizdb_watchlist import toggle_button
 
@@ -38,3 +39,11 @@ def test_toggle_button_url_is_none(http_request, person):
     with patch("mizdb_watchlist.templatetags.mizdb_watchlist.reverse") as reverse_mock:
         toggle_button(http_request, person, url=None)
         reverse_mock.assert_called_with("watchlist:toggle")
+
+
+def test_toggle_button_no_reverse_match(http_request, person):
+    """Assert that toggle_button catches NoReverseMatch exceptions."""
+    with patch("mizdb_watchlist.templatetags.mizdb_watchlist.reverse") as reverse_mock:
+        reverse_mock.side_effect = NoReverseMatch()
+        result = toggle_button(http_request, person, text="foo", url=None, on_watchlist=True)
+        assert result["toggle_url"] == ""

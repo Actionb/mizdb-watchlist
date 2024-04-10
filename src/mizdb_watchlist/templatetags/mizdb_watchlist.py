@@ -3,7 +3,7 @@ from typing import Optional
 from django import template
 from django.db.models import Model
 from django.http import HttpRequest
-from django.urls import reverse
+from django.urls import NoReverseMatch, reverse
 
 from mizdb_watchlist.manager import get_manager
 
@@ -74,7 +74,10 @@ def toggle_button(
         {% endfor %}
     """
     if url is None:
-        url = reverse("watchlist:toggle")
+        try:
+            url = reverse("watchlist:toggle")
+        except NoReverseMatch:
+            url = ""
     if on_watchlist is None:
         on_watchlist = get_manager(request).on_watchlist(obj)
     return {

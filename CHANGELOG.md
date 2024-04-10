@@ -3,6 +3,8 @@
 ## [unreleased]
 
 - tweak watchlist overview template and CSS
+- toggle button template tag and watchlist link template tag now silence
+  NoReverseMatch exceptions when URL name cannot be reversed
 
 ## 0.1.7 (2024-04-09)
 
