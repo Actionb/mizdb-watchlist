@@ -3,10 +3,10 @@
 
 <div id="watchlist">
     {% for model_name, watchlist_data in watchlist.items %}
-    <div id="{{model_name}}-watchlist" class="model-watchlist-container mb-3 p-3">
+    <div id="{{model_name}}-watchlist" class="model-watchlist-container mb-3 p-3 border rounded">
         <div class="d-flex justify-content-between border-bottom">
             <div class="d-flex justify-content-between">
-                <h2>{{ model_name }}</h2>
+                <h2 class="watchlist-model-heading">{{ model_name }}</h2>
                 {% if watchlist_data.changelist_url %}
                     <a class="btn btn-link my-auto watchlist-btn watchlist-changelist-btn" href="{{ watchlist_data.changelist_url }}">{% trans 'Changelist' %}</a>
                 {% endif %}
@@ -17,7 +17,7 @@
                     title="{% blocktranslate %}Remove all {{ model_name }} watchlist items{% endblocktranslate %}"
             >{% trans 'Remove all' %}</button>
         </div>
-        <ul class="list-group list-group-flush watchlist-items-list ms-3">
+        <ul class="list-group list-group-flush watchlist-items-list">
             {% for watchlist_item in watchlist_data.model_items %}
             <li class="list-group-item list-group-item-action d-flex justify-content-between watchlist-item">
                 {% if watchlist_item.object_url %}
