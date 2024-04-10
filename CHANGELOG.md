@@ -1,6 +1,6 @@
 # Changelog
 
-## [unreleased]
+## 0.1.8 (2024-04-10)
 
 - tweak watchlist overview template and CSS
 - toggle button template tag and watchlist link template tag now silence
