@@ -10,8 +10,9 @@ The watchlist items are stored in a Watchlist model for authenticated users.
 For unauthenticated users, the watchlist is stored in a Django session instead.
 
 The styling was written with [Bootstrap](https://getbootstrap.com/) in mind.
-Alternatively, some rudimentary styling is provided with `mizdb_watchlist/css/watchlist.css`.
-You can use this for the admin site or if you don't want to use Bootstrap.
+Alternatively, some rudimentary styling is provided with `mizdb_watchlist/css/watchlist.css`
+and `mizdb_watchlist/css/watchlist_toggle.css`.
+You can use these for the admin site or if you don't want to use Bootstrap.
 
 [comment]: <> (@formatter:off)
 <!-- TOC -->
@@ -27,6 +28,7 @@ You can use this for the admin site or if you don't want to use Bootstrap.
     * [Admin toggle button & watchlist link](#admin-toggle-button--watchlist-link)
     * [admin.WatchlistMixin](#adminwatchlistmixin)
     * [Admin action](#admin-action)
+  * [Initializing buttons](#initializing-buttons)
   * [Demo & Development](#demo--development)
     * [Tests](#tests)
     * [Linting & Formatting](#linting--formatting)
@@ -85,10 +87,17 @@ Use the `toggle_button` template tag to a button to your page:
 {% load static mizdb_watchlist %}
 {% block extrahead %}
   <script src="{% static 'mizdb_watchlist/js/watchlist.js' %}"></script>
+
+  {# watchlist_init.js will initialize any watchlist buttons on the page #}
+  <script src="{% static 'mizdb_watchlist/js/watchlist_init.js' %}"></script>
+
+  {# Optional stylesheet, to make the button change color when toggled: #}
+  <link rel="stylesheet" href="{% static 'mizdb_watchlist/css/watchlist_toggle.css' %}">
+
 {% endblock extrahead %}
 
 {% block content %}
-  <h5>{{ object }} {% toggle_button view.request object %}</h5>
+  <h5>{{ object }} {% toggle_button view.request object classes='foo bar' %}</h5>
   ...
 {% endblock content %}
 ```
@@ -108,6 +117,7 @@ The template tag takes the following arguments:
 | text         | `""`          | optional text for the button                                                              |
 | url          | `None`        | the URL for the view that handles the toggling. Defaults to `reverse("watchlist:toggle")` |
 | on_watchlist | `None`        | an optional boolean that indicates whether the item is on the watchlist                   |
+| classes      | `""`          | additional CSS classes for the button                                                     |
 
 ### ListViews and the `on_watchlist` QuerySet annotation
 
@@ -194,6 +204,7 @@ Render the HTML for the watchlist in your template, for example:
 
 {% block extrahead %}
   <script src="{% static 'mizdb_watchlist/js/watchlist.js' %}"></script>
+  <script src="{% static 'mizdb_watchlist/js/watchlist_init.js' %}"></script>
 {% endblock %}
 
 {% block content %}
@@ -287,6 +298,7 @@ To include the toggle button on admin change pages, you can override the
   {{ block.super }}
   <link rel="stylesheet" href="{% static 'mizdb_watchlist/css/watchlist.css' %}">
   <script src="{% static 'mizdb_watchlist/js/watchlist.js' %}"></script>
+  <script src="{% static 'mizdb_watchlist/js/watchlist_init.js' %}"></script>
 {% endblock extrahead %}
 
 {% block content_subtitle %}
@@ -354,6 +366,44 @@ class MyModelAdmin(WatchlistMixin, admin.ModelAdmin):
 
 # or for the entire admin site:
 my_admin_site.add_action(add_to_watchlist)
+```
+
+## Initializing watchlist buttons
+
+In the above examples, `watchlist_init.js` was used to initialize any button
+that interacts with the watchlist.
+However, you can initialize the buttons yourself by using the `initToggleButton`,
+`initRemoveButton` and `initRemoveAllButton` functions provided by the global
+attribute `WatchlistButton`.
+
+For example like this:
+
+```javascript
+document.addEventListener('DOMContentLoaded', () => {
+  const myToggleButton = document.querySelector('.my-toggle-button')
+  WatchlistButton.initToggleButton(myToggleButton)
+})
+```
+
+This also lets you provide a callback function that is called after the button
+was pressed and the response from the server was handled.  
+The callback will be called with the button that was pressed and the response
+data.
+
+```javascript
+document.addEventListener('DOMContentLoaded', () => {
+  const myToggleButton = document.querySelector('.my-toggle-button')
+  const myCallback = (btn, data) => {
+    if (data.on_watchlist) {
+      btn.classList.remove('btn-primary')
+      btn.classList.add('btn-success')
+    } else {
+      btn.classList.add('btn-primary')
+      btn.classList.remove('btn-success')
+    }
+  }
+  WatchlistButton.initToggleButton(myToggleButton, myCallback)
+})
 ```
 
 ## Demo & Development

@@ -4,6 +4,23 @@
 
 - get CSRF value from cookie if not using token
 
+- reworked toggle button:
+	- toggling the toggle button now only toggles `on-watchlist` CSS class
+	  (was also toggling `text-primary` and `text-success`)
+	- added `watchlist_toggle.css`
+	- `toggle_button` template tag now accepts `classes` argument for providing own
+	  CSS classes
+	- toggle button template no longer includes CSS classes
+	  `btn btn-link text-decoration-none` by default
+
+- reworked how watchlist buttons are initialized:
+	- `watchlist.js` no longer adds click event handlers when the page has been loaded
+	- `watchlist.js` now exposes several init functions that must be called to
+	  add the click event handlers for their respective button: `initToggleButton`, `initRemoveButton`, `initRemoveAllButton`, `initButton`
+  - the exposed functions allow users to add callback functions that will be called
+    after the response from the server was handled
+  - added `watchlist_init.js` that initializes all watchlist buttons on a page
+
 ## 0.1.8 (2024-04-10)
 
 - tweak watchlist overview template and CSS

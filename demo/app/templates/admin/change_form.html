@@ -4,7 +4,8 @@
 {% block extrahead %}
   {{ block.super }}
   <link rel="stylesheet" href="{% static 'mizdb_watchlist/css/watchlist.css' %}">
+  <link rel="stylesheet" href="{% static 'mizdb_watchlist/css/watchlist_toggle.css' %}">
   <script src="{% static 'mizdb_watchlist/js/watchlist.js' %}"></script>
 {% endblock extrahead %}
 
-{% block content_subtitle %}{% if subtitle %}<h2>{{ subtitle }} {% toggle_button request original %}</h2>{% endif %}{% endblock %}
+{% block content_subtitle %}{% if subtitle %}<h2>{{ subtitle }} {% toggle_button request original classes='btn btn-link text-decoration-none' %}</h2>{% endif %}{% endblock %}

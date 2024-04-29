@@ -1,0 +1,7 @@
+.watchlist-toggle-btn {
+    color: rgb(33, 37, 41);
+}
+
+.watchlist-toggle-btn.on-watchlist {
+    color: rgb(24, 188, 156);
+}

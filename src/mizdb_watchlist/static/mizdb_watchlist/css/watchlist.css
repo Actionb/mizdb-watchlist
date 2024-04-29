@@ -35,10 +35,6 @@
     color: red;
 }
 
-.watchlist-toggle-btn.on-watchlist {
-    color: rgb(24, 188, 156);
-}
-
 .d-flex {
     display: flex;
 }

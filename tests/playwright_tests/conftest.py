@@ -138,8 +138,6 @@ def assert_toggled_on():
 
     def inner(toggle_button):
         expect(toggle_button).to_have_class(re.compile("on-watchlist"))
-        expect(toggle_button).to_have_class(re.compile("text-success"))
-        expect(toggle_button).not_to_have_class(re.compile("text-primary"))
 
     return inner
 
@@ -153,8 +151,6 @@ def assert_toggled_off():
 
     def inner(toggle_button):
         expect(toggle_button).not_to_have_class(re.compile("on-watchlist"))
-        expect(toggle_button).not_to_have_class(re.compile("text-success"))
-        expect(toggle_button).to_have_class(re.compile("text-primary"))
 
     return inner
 

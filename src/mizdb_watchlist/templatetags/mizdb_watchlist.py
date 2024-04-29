@@ -29,6 +29,7 @@ def toggle_button(
     text: str = "",
     url: Optional[str] = None,
     on_watchlist: Optional[bool] = None,
+    classes: str = "",
 ) -> dict:
     """
     Render a watchlist toggle button for the given model object.
@@ -50,6 +51,7 @@ def toggle_button(
             the user's watchlist. If None, the tag will check the watchlist
             storage. This will generate a database query if the watchlist uses
             the Watchlist model!
+        classes (str): additional CSS classes for the button
 
     Example:
         In the template for a generic ListView:
@@ -86,4 +88,5 @@ def toggle_button(
         "text": text,
         "toggle_url": url,
         "on_watchlist": on_watchlist,
+        "classes": classes,
     }

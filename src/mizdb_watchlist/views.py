@@ -2,7 +2,7 @@ from collections import OrderedDict
 
 from django.apps import apps
 from django.core.exceptions import ObjectDoesNotExist
-from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
+from django.http import HttpResponseBadRequest, JsonResponse
 from django.urls import NoReverseMatch, reverse
 from django.views.decorators.csrf import csrf_protect
 from django.views.generic.base import ContextMixin
@@ -162,7 +162,7 @@ def watchlist_remove(request):
         manager.remove(_get_model_object(model_label, pk))
     except (LookupError, ObjectDoesNotExist):
         pass
-    return HttpResponse()
+    return JsonResponse({})
 
 
 @csrf_protect
@@ -173,4 +173,4 @@ def watchlist_remove_all(request):
     except (KeyError, LookupError):
         return HttpResponseBadRequest()
     get_manager(request).remove_model(model)
-    return HttpResponse()
+    return JsonResponse({})
