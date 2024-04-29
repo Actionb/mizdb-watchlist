@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.1 (2024-04-29)
+
+- add missing `watchlist_init.js` to admin watchlist template
+
 ## 1.0.0 (2024-04-29)
 
 - get CSRF value from cookie if not using token
