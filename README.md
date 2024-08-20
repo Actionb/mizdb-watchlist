@@ -414,6 +414,11 @@ Install (requires [poetry](https://python-poetry.org/docs/) and npm):
 make init
 ```
 
+Install pre-commit hooks:
+```commandline
+pre-commit install
+```
+
 ### Tests
 
 Install required playwright browsers with:
