@@ -5,7 +5,13 @@ import pytest
 from django.contrib.auth.models import AnonymousUser
 from django.contrib.contenttypes.models import ContentType
 
-from mizdb_watchlist.manager import WATCHLIST_SESSION_KEY, ModelManager, SessionManager, get_manager
+from mizdb_watchlist.manager import (
+    WATCHLIST_SESSION_KEY,
+    ModelManager,
+    SessionManager,
+    _get_manager_from_settings,
+    get_manager,
+)
 
 pytestmark = pytest.mark.django_db
 
@@ -25,28 +31,58 @@ class CustomSessionManager(SessionManager):
 
 
 @pytest.fixture
-def watchlist_settings(settings):
-    settings.MIZDB_WATCHLIST = {}
-    return settings.MIZDB_WATCHLIST
+def mizdb_watchlist_settings():
+    """Default for the MIZDB watchlist settings."""
+    return {}
 
 
 @pytest.fixture
-def manager_settings(watchlist_settings):
-    manager_settings = {}
-    watchlist_settings["manager"] = manager_settings
-    return manager_settings
+def add_watchlist_settings(settings, mizdb_watchlist_settings):
+    """Add the MIZDB watchlist settings to the settings."""
+    settings.MIZDB_WATCHLIST = mizdb_watchlist_settings
+    return mizdb_watchlist_settings
 
 
 @pytest.fixture
-def use_custom_model_manager(manager_settings):
+def watchlist_settings():
+    """Default for the manager watchlist settings."""
+    return {}
+
+
+@pytest.fixture
+def add_manager_settings(add_watchlist_settings, watchlist_settings):
+    """Add manager settings to the watchlist settings."""
+    add_watchlist_settings["manager"] = watchlist_settings
+    return watchlist_settings
+
+
+@pytest.fixture
+def use_custom_model_manager(add_manager_settings):
     """Override the default watchlist model manager class."""
-    manager_settings["model"] = "tests.test_manager.CustomModelManager"
+    add_manager_settings["model"] = "tests.test_manager.CustomModelManager"
 
 
 @pytest.fixture
-def use_custom_session_manager(manager_settings):
+def use_custom_session_manager(add_manager_settings):
     """Override the default watchlist session manager class."""
-    manager_settings["session"] = "tests.test_manager.CustomSessionManager"
+    add_manager_settings["session"] = "tests.test_manager.CustomSessionManager"
+
+
+@pytest.mark.parametrize("manager_settings", [{"model": "foo.bar"}])
+def test_get_manager_from_settings_import_error(add_manager_settings, manager_settings):
+    """
+    Assert that _get_manager_from_settings returns None if the manager could
+    not be imported.
+    """
+    assert _get_manager_from_settings("model") is None
+
+
+def test_get_manager_from_settings_key_error(use_custom_model_manager):
+    """
+    Assert that _get_manager_from_settings returns None if the manager type is
+    not specified in the settings.
+    """
+    assert _get_manager_from_settings("session") is None
 
 
 class TestGetManager:

@@ -15,7 +15,7 @@ reformat:
 
 .PHONY: lint
 lint:
-	-ruff . --no-fix
+	-ruff check . --no-fix
 	-ruff format --check .
 	-npx standard .
 
