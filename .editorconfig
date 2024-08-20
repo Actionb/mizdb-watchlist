@@ -71,9 +71,6 @@ ij_html_space_inside_empty_tag = false
 ij_html_text_wrap = off
 
 [{*.markdown,*.md}]
-indent_size = 2
-indent_style = space
-tab_width = 2
 trim_trailing_whitespace = false  # 2 trailing whitespaces indicate a line break
 
 # IntelliJ specific options:
