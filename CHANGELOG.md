@@ -1,5 +1,9 @@
 # Changelog
 
+## [unreleased]
+
+- enable overriding watchlist manager classes via settings 
+
 ## 1.0.1 (2024-04-29)
 
 - add missing `watchlist_init.js` to admin watchlist template

@@ -406,6 +406,41 @@ document.addEventListener('DOMContentLoaded', () => {
 })
 ```
 
+## Settings
+
+### Overriding a watchlist manager class
+
+The managers are responsible for managing the items on the watchlist (for example, they add or remove items).
+There are two types of manager:
+
+- a model manager that manages a watchlist based on a Django model (by default: `mizdb_watchlist.models.Watchlist`) and
+  stored in the database
+- a session manager that manages a watchlist stored in a Django session
+
+To override a manager class, declare the path to your class in the settings:
+
+```python
+# foo/bar.py
+from mizdb_watchlist.manager import ModelManager, SessionManager
+
+
+class MyModelManager(ModelManager):
+  ...
+
+
+class MySessionManager(SessionManager):
+  ...
+
+
+# settings.py
+MIZDB_WATCHLIST = {
+  "manager": {
+    "model": "foo.bar.MyModelManager",
+    "session": "foo.bar.MySessionManager",
+  }
+}
+```
+
 ## Demo & Development
 
 Install (requires [poetry](https://python-poetry.org/docs/) and npm):
