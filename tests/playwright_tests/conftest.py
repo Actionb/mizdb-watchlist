@@ -62,7 +62,6 @@ def get_session_cookie(context):
     """Return the cookie with the session id."""
 
     def inner():
-
         try:
             return next(c for c in context.cookies() if c["name"] == "sessionid")
         except StopIteration:

@@ -49,7 +49,6 @@ pytestmark = [pytest.mark.django_db, pytest.mark.urls(__name__)]
 
 
 class TestWatchlistViewMixin:
-
     @pytest.fixture
     def view(self):
         return WatchlistViewMixin()
@@ -148,7 +147,6 @@ def object_id(person):
 @pytest.mark.usefixtures("login_user", "ignore_csrf_protection")
 @pytest.mark.parametrize("request_method", ["POST"])
 class TestWatchlistToggle:
-
     def test_watchlist_toggle(self, http_request):
         response = watchlist_toggle(http_request)
         assert response.status_code == 200
@@ -185,7 +183,6 @@ class TestWatchlistToggle:
 @pytest.mark.usefixtures("login_user", "ignore_csrf_protection")
 @pytest.mark.parametrize("request_method", ["POST"])
 class TestWatchlistRemove:
-
     def test_watchlist_remove(self, http_request):
         response = watchlist_remove(http_request)
         assert response.status_code == 200
@@ -214,7 +211,6 @@ class TestWatchlistRemove:
 @pytest.mark.usefixtures("login_user", "ignore_csrf_protection")
 @pytest.mark.parametrize("request_method", ["POST"])
 class TestWatchlistRemoveAll:
-
     def test_watchlist_remove_all(self, http_request):
         response = watchlist_remove_all(http_request)
         assert response.status_code == 200
@@ -240,7 +236,6 @@ class DummyListView(WatchlistMixin, ListView):
 
 
 class TestListViewMixin:
-
     @pytest.fixture
     def view(self, http_request, add_watchlist_annotations):
         view = DummyListView()

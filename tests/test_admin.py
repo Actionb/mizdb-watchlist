@@ -43,7 +43,6 @@ def watchlist_response(http_request, model_admin):
 
 @pytest.mark.usefixtures("mock_each_context", "mock_get_watchlist_context")
 class TestWatchlistAdmin:
-
     def test_get_urls_includes_watchlist_url(self, model_admin):
         pattern = model_admin.get_urls()[0]
         assert pattern.name == "watchlist"
@@ -73,7 +72,6 @@ class PersonAdmin(WatchlistMixin, admin.ModelAdmin):
 
 
 class TestModelAdminMixin:
-
     @pytest.fixture
     def view(self, http_request, add_watchlist_annotations):
         view = PersonAdmin(Person, admin.site)

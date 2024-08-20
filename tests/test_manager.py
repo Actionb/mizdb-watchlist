@@ -46,7 +46,6 @@ def test_get_manager_authenticated_user(http_request, user):
 @pytest.mark.parametrize("manager_class", [SessionManager])
 @pytest.mark.parametrize("user", [None])
 class TestSessionManager:
-
     @pytest.fixture
     def watchlist_items(self, person) -> list[dict]:
         """Default items for the session watchlist."""
@@ -177,7 +176,6 @@ class TestSessionManager:
 
 @pytest.mark.parametrize("manager_class", [ModelManager])
 class TestModelManager:
-
     @pytest.fixture
     def person_watchlist(self, watchlist_model, person_ct, user):
         return watchlist_model.objects.filter(content_type=person_ct, user_id=user.pk)
