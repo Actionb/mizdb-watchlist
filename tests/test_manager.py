@@ -16,30 +16,77 @@ def manager(manager_class, http_request, add_session) -> Union[SessionManager, M
     return manager_class(http_request)
 
 
-@pytest.mark.parametrize("user", [AnonymousUser()])
-def test_get_manager_anonymous_user(http_request, user):
-    """
-    Assert that get_manager returns a SessionManager for requests made by
-    unauthenticated users.
-    """
-    assert isinstance(get_manager(http_request), SessionManager)
+class CustomModelManager(ModelManager):
+    pass
 
 
-@pytest.mark.parametrize("user", [None])
-def test_get_manager_user_not_set(http_request, user):
-    """
-    Assert that get_manager returns a SessionManager for requests where the
-    user attribute is not set.
-    """
-    assert isinstance(get_manager(http_request), SessionManager)
+class CustomSessionManager(SessionManager):
+    pass
 
 
-def test_get_manager_authenticated_user(http_request, user):
-    """
-    Assert that get_manager returns a ModelManager for requests made by
-    authenticated users.
-    """
-    assert isinstance(get_manager(http_request), ModelManager)
+@pytest.fixture
+def watchlist_settings(settings):
+    settings.MIZDB_WATCHLIST = {}
+    return settings.MIZDB_WATCHLIST
+
+
+@pytest.fixture
+def manager_settings(watchlist_settings):
+    manager_settings = {}
+    watchlist_settings["manager"] = manager_settings
+    return manager_settings
+
+
+@pytest.fixture
+def use_custom_model_manager(manager_settings):
+    """Override the default watchlist model manager class."""
+    manager_settings["model"] = "tests.test_manager.CustomModelManager"
+
+
+@pytest.fixture
+def use_custom_session_manager(manager_settings):
+    """Override the default watchlist session manager class."""
+    manager_settings["session"] = "tests.test_manager.CustomSessionManager"
+
+
+class TestGetManager:
+    @pytest.mark.parametrize("user", [AnonymousUser()])
+    def test_get_manager_anonymous_user(self, http_request, user):
+        """
+        Assert that get_manager returns a SessionManager for requests made by
+        unauthenticated users.
+        """
+        assert isinstance(get_manager(http_request), SessionManager)
+
+    @pytest.mark.parametrize("user", [None])
+    def test_get_manager_user_not_set(self, http_request, user):
+        """
+        Assert that get_manager returns a SessionManager for requests where the
+        user attribute is not set.
+        """
+        assert isinstance(get_manager(http_request), SessionManager)
+
+    def test_get_manager_authenticated_user(self, http_request, user):
+        """
+        Assert that get_manager returns a ModelManager for requests made by
+        authenticated users.
+        """
+        assert isinstance(get_manager(http_request), ModelManager)
+
+    def test_get_manager_model_manager_settings(self, http_request, user, use_custom_model_manager):
+        """
+        Assert that, for requests made by authenticated users, get_manager returns
+        the model manager specified in the settings if such a setting exists.
+        """
+        assert isinstance(get_manager(http_request), CustomModelManager)
+
+    @pytest.mark.parametrize("user", [None])
+    def test_get_manager_session_manager_settings(self, http_request, user, use_custom_session_manager):
+        """
+        Assert that, for requests made by unauthenticated users, get_manager returns
+        the session manager specified in the settings if such a setting exists.
+        """
+        assert isinstance(get_manager(http_request), CustomSessionManager)
 
 
 @pytest.mark.usefixtures("add_session")
