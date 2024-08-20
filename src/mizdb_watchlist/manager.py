@@ -1,6 +1,8 @@
+from importlib import import_module
 from operator import itemgetter
 
 from django.apps import apps
+from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.db.models import ExpressionWrapper, Q, QuerySet
@@ -11,6 +13,37 @@ WATCHLIST_SESSION_KEY = "watchlist"
 ANNOTATION_FIELD = "on_watchlist"
 
 
+def _get_watchlist_settings():
+    """Return the settings for MIZDB watchlist."""
+    return getattr(settings, "MIZDB_WATCHLIST", {})
+
+
+def _get_manager_settings():
+    """Return the manager settings of the MIZDB watchlist settings."""
+    return _get_watchlist_settings().get("manager", {})
+
+
+def _get_manager_from_settings(manager_type):
+    """
+    Return the manager for the given type (session or model) as specified by
+    the settings.
+
+    The setting should be the python path to the manager class and must be
+    importable:
+        (settings.py)
+        MIZDB_WATCHLIST = {
+            "manager": {
+                "model": "foo.bar.MyModelManager",
+            }
+        }
+    """
+    try:
+        module, cls = _get_manager_settings()[manager_type].rsplit(".", 1)
+        return getattr(import_module(module), cls)
+    except (KeyError, ImportError):
+        return None
+
+
 def get_manager(request):
     """
     Return a watchlist manager for the given request.
@@ -18,13 +51,14 @@ def get_manager(request):
     If the user is authenticated, return a ModelManager instance. Otherwise,
     return a SessionManager instance.
     """
+    manager_class = _get_manager_from_settings("session") or SessionManager
     try:
         if request.user.is_authenticated:
-            return ModelManager(request)
+            manager_class = _get_manager_from_settings("model") or ModelManager
     except AttributeError:
         # request.user was not set or request.user was None
         pass
-    return SessionManager(request)
+    return manager_class(request)
 
 
 class BaseManager:
