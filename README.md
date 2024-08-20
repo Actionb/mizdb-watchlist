@@ -28,7 +28,9 @@ You can use these for the admin site or if you don't want to use Bootstrap.
     * [Admin toggle button & watchlist link](#admin-toggle-button--watchlist-link)
     * [admin.WatchlistMixin](#adminwatchlistmixin)
     * [Admin action](#admin-action)
-  * [Initializing buttons](#initializing-buttons)
+  * [Initializing watchlist buttons](#initializing-watchlist-buttons)
+  * [Settings](#settings)
+    * [Overriding a watchlist manager class](#overriding-a-watchlist-manager-class)
   * [Demo & Development](#demo--development)
     * [Tests](#tests)
     * [Linting & Formatting](#linting--formatting)
@@ -425,19 +427,19 @@ from mizdb_watchlist.manager import ModelManager, SessionManager
 
 
 class MyModelManager(ModelManager):
-  ...
+    ...
 
 
 class MySessionManager(SessionManager):
-  ...
+    ...
 
 
 # settings.py
 MIZDB_WATCHLIST = {
-  "manager": {
-    "model": "foo.bar.MyModelManager",
-    "session": "foo.bar.MySessionManager",
-  }
+    "manager": {
+        "model": "foo.bar.MyModelManager",
+        "session": "foo.bar.MySessionManager",
+    }
 }
 ```
 
@@ -450,6 +452,7 @@ make init
 ```
 
 Install pre-commit hooks:
+
 ```commandline
 pre-commit install
 ```
