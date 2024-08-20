@@ -24,7 +24,6 @@ django = ">4"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "8.0.2"
-black = "24.2.0"
 ruff = "0.2.2"
 build = "1.0.3"
 twine = "5.0.0"
@@ -43,7 +42,3 @@ source = ["mizdb_watchlist"]
 
 [tool.coverage.paths]
 source = ["src", ".tox/*/site-packages"]
-
-[tool.black]
-line-length = 120
-target_version = ["py39", "py310", "py311"]

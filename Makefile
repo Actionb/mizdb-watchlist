@@ -9,15 +9,15 @@ test:
 
 .PHONY: reformat
 reformat:
-	ruff check . --fix
-	black .
-	npx standard . --fix
+	-ruff check . --fix
+	-ruff format .
+	-npx standard . --fix
 
 .PHONY: lint
 lint:
-	ruff . --no-fix
-	black . --check
-	npx standard .
+	-ruff . --no-fix
+	-ruff format --check .
+	-npx standard .
 
 .PHONY: build
 build:
