@@ -96,9 +96,9 @@ def test_add_to_watchlist_action(person, changelist_view, on_watchlist_model):
     """Test the 'add to watchlist' admin action."""
     checkboxes = changelist_view.locator(".action-checkbox").get_by_role("checkbox")
     checkboxes.first.click()
-    changelist_form = changelist_view.locator("#changelist-form")
-    changelist_form.get_by_label("Action").select_option(value="add_to_watchlist")
-    changelist_form.get_by_role("button").click()
+    actions_select = changelist_view.locator("#changelist-form div.actions")
+    actions_select.get_by_label("Action").select_option(value="add_to_watchlist")
+    actions_select.get_by_role("button").click()
     assert on_watchlist_model(person)
 
 
