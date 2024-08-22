@@ -9,13 +9,13 @@ test:
 
 .PHONY: reformat
 reformat:
-	-ruff check . --fix
+	-ruff check --fix .
 	-ruff format .
-	-npx standard . --fix
+	-npx standard --fix .
 
 .PHONY: lint
 lint:
-	-ruff check . --no-fix
+	-ruff check --no-fix .
 	-ruff format --check .
 	-npx standard .
 
