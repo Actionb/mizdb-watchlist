@@ -94,7 +94,9 @@ class TestWatchlistViewMixin:
 
     def test_get_watchlist_context(self, view, mock_get_watchlist, wsgi_request, person_model, person_label):
         """Assert that the `watchlist` item contains the expected data."""
-        mock_get_watchlist.return_value = {person_label: [{"object_id": 1}, {"object_id": 2}]}
+        mock_get_watchlist.return_value = {
+            person_label: [{"object_id": 1, "object_repr": "foo"}, {"object_id": 2, "object_repr": "bar"}]
+        }
         context = view.get_watchlist_context(wsgi_request)
         assert person_model._meta.verbose_name in context["watchlist"]
         watchlist_data = context["watchlist"][person_model._meta.verbose_name]

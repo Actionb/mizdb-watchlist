@@ -3,6 +3,8 @@
 ## [unreleased]
 
 - enable overriding watchlist manager classes via settings
+- add `get_object_text` hook to WatchlistViewMixin: use this to dictate the text to be displayed for a watchlist item on
+  the watchlist overview
 
 ## 1.0.1 (2024-04-29)
 

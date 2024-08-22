@@ -45,6 +45,9 @@ class WatchlistViewMixin(ContextMixin):
                 except NoReverseMatch:
                     continue
                 watchlist_item["model_label"] = model_label
+                watchlist_item["object_repr"] = self.get_object_text(
+                    request, model, watchlist_item["object_id"], watchlist_item["object_repr"]
+                )
                 model_items.append(watchlist_item)
 
             if model_items:
@@ -82,6 +85,13 @@ class WatchlistViewMixin(ContextMixin):
         context = super().get_context_data(**kwargs)
         context.update(self.get_watchlist_context(self.request))  # noqa
         return context
+
+    def get_object_text(self, request, model, pk, object_repr=""):
+        """
+        Return a text to be displayed on the overview for the watchlist item
+        given by the model and object id.
+        """
+        return object_repr
 
 
 def annotate_view_queryset(request, queryset):
