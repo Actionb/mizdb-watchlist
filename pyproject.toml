@@ -20,7 +20,7 @@ repository = "https://github.com/Actionb/mizdb-watchlist"
 
 [tool.poetry.dependencies]
 python = "^3.9"
-django = ">4.2"
+django = ">=4.2"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.0.2"
