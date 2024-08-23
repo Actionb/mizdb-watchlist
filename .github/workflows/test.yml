@@ -64,7 +64,7 @@ jobs:
       # Cache the playwright browsers: https://dev.to/ayomiku222/how-to-cache-playwright-browser-on-github-actions-51o6
       - name: Get installed Playwright version
         id: playwright-version
-        run: echo "PLAYWRIGHT_VERSION=$(poetry run playwright --version | cut -d ' ' -f 2)" >> $GITHUB_ENV
+        run: echo "PLAYWRIGHT_VERSION=$(poetry run pip freeze | grep '^playwright==' | cut -d '=' -f 3)" >> $GITHUB_ENV
       - name: Cache playwright binaries
         uses: actions/cache@v4
         id: playwright-cache
