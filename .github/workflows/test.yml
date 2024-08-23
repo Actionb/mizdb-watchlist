@@ -1,0 +1,83 @@
+name: Run tests
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  ruff:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: chartboost/ruff-action@v1
+
+  tests:
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: [ "3.9", "3.10", "3.11", "3.12" ]
+        django-version: [ "4.2", "5.0", "5.1", "main" ]
+        exclude:
+          # Django 5.0
+          - python-version: "3.9"
+            django-version: "5.0"
+
+          # Django 5.1
+          - python-version: "3.9"
+            django-version: "5.1"
+
+          # Django main
+          - python-version: "3.9"
+            django-version: "main"
+    steps:
+      # Setup
+      - uses: actions/checkout@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install poetry
+        run: |
+          python -m pip install poetry==1.8.3
+      - name: Configure poetry
+        run: |
+          python -m poetry config virtualenvs.in-project true
+
+      # Install dependencies
+      - name: Cache the virtualenv
+        uses: actions/cache@v4
+        with:
+          path: ./.venv
+          key: ${{ runner.os }}-venv-${{ hashFiles('**/poetry.lock') }}
+      - name: Install dependencies
+        run: |
+          python -m poetry install
+      - run: python -m poetry run python -m pip install -U Django==${{ matrix.django-version }}
+        if: matrix.django-version != 'main'
+      - run: python -m poetry run python -m pip install -U https://github.com/django/django/archive/master.tar.gz
+        if: matrix.django-version == 'main'
+
+      # Playwright
+      # Cache the playwright browsers: https://dev.to/ayomiku222/how-to-cache-playwright-browser-on-github-actions-51o6
+      - name: Get installed Playwright version
+        id: playwright-version
+        run: echo "PLAYWRIGHT_VERSION=$(poetry run playwright --version | cut -d ' ' -f 2)" >> $GITHUB_ENV
+      - name: Cache playwright binaries
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: |
+            ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_VERSION }}
+      - run: python -m poetry run playwright install --with-deps
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+      - run: python -m poetry run playwright install-deps
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+
+      # Run the tests
+      - name: Run tests
+        run: |
+          python -m poetry run python -m pytest -sxv
