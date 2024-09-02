@@ -1,6 +1,10 @@
 # Changelog
 
-## [unreleased]
+## 1.1.1 (2024-09-02)
+
+- fix Django requirements being too strict (was ">4", should be ">=4.2") 
+
+## 1.1.0 (2024-08-22)
 
 - enable overriding watchlist manager classes via settings
 - add `get_object_text` hook to WatchlistViewMixin: use this to dictate the text to be displayed for a watchlist item on
